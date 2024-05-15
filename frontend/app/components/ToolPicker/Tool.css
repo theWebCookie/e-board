@@ -1,0 +1,16 @@
+.tool {
+  background-color: #fff;
+  border: none;
+  padding: 5px;
+  transition: 0.3s;
+  border-radius: 10px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #ececf4;
+  }
+}
+
+.tool.active {
+  background-color: #e0dfff;
+}
