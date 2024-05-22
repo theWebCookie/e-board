@@ -1,0 +1,19 @@
+.board-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  border: none;
+  justify-content: center;
+  background-color: #ececf4;
+  cursor: pointer;
+  transition: 0.3s;
+
+  &:hover {
+    background-color: #bfbfe9;
+  }
+}
+
+.board-button.menu {
+  border-radius: 5px;
+}
