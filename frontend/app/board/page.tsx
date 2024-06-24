@@ -6,7 +6,7 @@ import ToolPicker from '../components/ToolPicker/ToolPicker';
 import './page.css';
 import rough from 'roughjs';
 import { Drawable } from 'roughjs/bin/core';
-
+import { Point } from 'roughjs/bin/geometry';
 export interface ITool {
   name: string;
   icon: string;
@@ -42,22 +42,24 @@ interface Event {
 const generator = rough.generator();
 
 function createElement(x1: number, y1: number, x2: number, y2: number, tool: string | null) {
-  let roughElement;
-  if (tool === 'line') {
-    roughElement = generator.line(x1, y1, x2, y2);
-  } else if (tool === 'rectangle') {
-    roughElement = generator.rectangle(x1, y1, x2 - x1, y2 - y1);
-  } else if (tool === 'circle') {
-    roughElement = generator.circle(x1, y1, x2 - x1);
-  } else if (tool === 'diamond') {
-    roughElement = generator.polygon([
-      [x1, y1 + (y2 - y1) / 2],
-      [x1 + (x2 - x1) / 2, y1],
-      [x2, y1 + (y2 - y1) / 2],
-      [x1 + (x2 - x1) / 2, y2],
-    ]);
+  switch (tool) {
+    case 'line':
+      return { x1, y1, x2, y2, roughElement: generator.line(x1, y1, x2, y2) };
+    case 'rectangle':
+      return { x1, y1, x2, y2, roughElement: generator.rectangle(x1, y1, x2 - x1, y2 - y1) };
+    case 'circle':
+      return { x1, y1, x2, y2, roughElement: generator.circle(x1, y1, x2 - x1) };
+    case 'diamond':
+      const points = [
+        [x1, y1 + (y2 - y1) / 2],
+        [x1 + (x2 - x1) / 2, y1],
+        [x2, y1 + (y2 - y1) / 2],
+        [x1 + (x2 - x1) / 2, y2],
+      ];
+      return { x1, y1, x2, y2, roughElement: generator.polygon(points as Point[]) };
+    default:
+      return { x1, y1, x2, y2, roughElement: undefined };
   }
-  return { x1, y1, x2, y2, roughElement };
 }
 
 const Board = () => {
