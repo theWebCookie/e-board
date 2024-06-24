@@ -49,6 +49,13 @@ function createElement(x1: number, y1: number, x2: number, y2: number, tool: str
     roughElement = generator.rectangle(x1, y1, x2 - x1, y2 - y1);
   } else if (tool === 'circle') {
     roughElement = generator.circle(x1, y1, x2 - x1);
+  } else if (tool === 'diamond') {
+    roughElement = generator.polygon([
+      [x1, y1 + (y2 - y1) / 2],
+      [x1 + (x2 - x1) / 2, y1],
+      [x2, y1 + (y2 - y1) / 2],
+      [x1 + (x2 - x1) / 2, y2],
+    ]);
   }
   return { x1, y1, x2, y2, roughElement };
 }
