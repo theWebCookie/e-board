@@ -8,6 +8,8 @@ import { Button } from '../ui/button';
 import { useForm } from 'react-hook-form';
 import { useToast } from '../ui/use-toast';
 import { useRouter } from 'next/navigation';
+import { Separator } from '@radix-ui/react-separator';
+import { DialogTrigger } from '../ui/dialog';
 
 const LoginForm = () => {
   const { toast } = useToast();
@@ -46,35 +48,46 @@ const LoginForm = () => {
     }
   };
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8 min-w-[250px]'>
-        <FormField
-          name='email'
-          render={({ field }) => (
-            <FormItem className='mb-5'>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder='Wprowadź email' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name='password'
-          render={({ field }) => (
-            <FormItem className='mb-5'>
-              <FormLabel>Hasło</FormLabel>
-              <FormControl>
-                <Input placeholder='Wprowadź hasło' type='password' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type='submit'>Login</Button>
-      </form>
-    </Form>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8 min-w-[250px]'>
+          <FormField
+            name='email'
+            render={({ field }) => (
+              <FormItem className='mb-5'>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder='Wprowadź email' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name='password'
+            render={({ field }) => (
+              <FormItem className='mb-5'>
+                <FormLabel>Hasło</FormLabel>
+                <FormControl>
+                  <Input placeholder='Wprowadź hasło' type='password' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type='submit' className='w-full'>
+            Login
+          </Button>
+          <Separator />
+        </form>
+      </Form>
+      <div className='flex flex-col justify-center'>
+        <p className='text-center mt-3 mb-3 font-extralight from-neutral-500'>Nie masz konta?</p>
+        <DialogTrigger asChild>
+          <Button variant='outline'>Rejestracja</Button>
+        </DialogTrigger>
+      </div>
+    </>
   );
 };
 
