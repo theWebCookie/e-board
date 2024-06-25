@@ -6,8 +6,12 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../ui/button';
 import { useForm } from 'react-hook-form';
+import { useToast } from '../ui/use-toast';
+import { useRouter } from 'next/navigation';
 
 const LoginForm = () => {
+  const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -16,12 +20,34 @@ const LoginForm = () => {
     },
   });
 
-  const onSubmit = () => {
-    console.log(form.getValues());
+  const mockData = {
+    email: 'example@com.pl',
+    password: '123456',
+  };
+
+  const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {
+    if (values.email !== mockData.email || values.password !== mockData.password) {
+      toast({
+        title: 'Bład logowania ☹️',
+        description: `Niepoprawne dane logowania`,
+        duration: 3000,
+      });
+      return;
+    } else {
+      toast({
+        title: 'Zalogowano pomyślnie 😊',
+        description: `Witaj ${values.email}`,
+        duration: 1000,
+      });
+
+      setTimeout(() => {
+        router.push('/home');
+      }, 1000);
+    }
   };
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8 min-w-[250px]'>
         <FormField
           name='email'
           render={({ field }) => (
