@@ -1,8 +1,8 @@
 'use client';
 import { useState, useLayoutEffect } from 'react';
-import Arrow from '../components/Arrow/Arrow';
-import BoardButton from '../components/BoardButton/BoardButton';
-import ToolPicker from '../components/ToolPicker/ToolPicker';
+import Arrow from '@/components/Arrow/Arrow';
+import BoardButton from '@/components/BoardButton/BoardButton';
+import ToolPicker from '@/components/ToolPicker/ToolPicker';
 import './page.css';
 import rough from 'roughjs';
 import { Drawable } from 'roughjs/bin/core';
