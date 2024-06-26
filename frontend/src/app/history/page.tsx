@@ -1,12 +1,11 @@
 import LayoutWithNav from '@/components/LayoutWithNav/LayoutWithNav';
-import React from 'react';
 
-const Home = () => {
+const History = () => {
   return (
     <LayoutWithNav>
-      <h1>Home</h1>
+      <h1>History</h1>
     </LayoutWithNav>
   );
 };
 
-export default Home;
+export default History;
