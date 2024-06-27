@@ -8,7 +8,7 @@ const LayoutWithNav: React.FC<LayoutWithNavProps> = ({ children }) => {
   return (
     <div>
       <Nav />
-      <main>{children}</main>
+      <main className='p-4'>{children}</main>
     </div>
   );
 };

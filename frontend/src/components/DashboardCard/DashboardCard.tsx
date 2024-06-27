@@ -23,7 +23,7 @@ const DashboardCard: React.FC<ICardWithUsers> = ({ title, url, description, user
           ))}
         </div>
         <div>
-          <Button>
+          <Button className='px-2 py-1 flex items-center'>
             <Link href={url}>Wejdź</Link>
           </Button>
         </div>

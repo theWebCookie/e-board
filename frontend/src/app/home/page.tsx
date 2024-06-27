@@ -1,3 +1,4 @@
+import CreateBoard from '@/components/CreateBoard/CreateBoard';
 import DashboardCard from '@/components/DashboardCard/DashboardCard';
 import LayoutWithNav from '@/components/LayoutWithNav/LayoutWithNav';
 import React from 'react';
@@ -21,7 +22,7 @@ const cards: ICardWithUsers[] = [
   {
     title: 'Pusta tablica',
     url: '/board/1',
-    description: 'empty board',
+    description: 'empty boardempty boardempty boardempty boardempty board',
     users: [
       { name: 'John Doe', image: '/avatar.png' },
       { name: 'Jane Doe', image: '/avatar.png' },
@@ -42,9 +43,14 @@ const Home = () => {
   return (
     <LayoutWithNav>
       <h1>Home</h1>
-      {cards.map((card) => (
-        <DashboardCard key={card.title} title={card.title} url={card.url} description={card.description} users={card.users} />
-      ))}
+      <section className='flex gap-5 items-center flex-wrap my-3'>
+        {cards.map((card) => (
+          <DashboardCard key={card.title} title={card.title} url={card.url} description={card.description} users={card.users} />
+        ))}
+      </section>
+      <section className='w-full'>
+        <CreateBoard />
+      </section>
     </LayoutWithNav>
   );
 };
