@@ -1,0 +1,22 @@
+{
+  "devDependencies": {
+    "@playwright/test": "^1.45.0",
+    "@types/node": "^20.14.9",
+    "husky": "^9.0.11",
+    "jest": "^29.7.0"
+  },
+  "scripts": {
+    "test": "npm run test:unit",
+    "test:unit": "npm run test:unit:frontend",
+    "test:unit:frontend": "cd frontend && npm test",
+    "test:unit:backend": "cd backend && npm test",
+    "test:e2e": "playwright test",
+    "cover:unit": "npm-run-all -s -c cover:unit:frontend cover:unit:backend",
+    "cover:unit:frontend": "cd frontend && npx jest --coverage",
+    "cover:unit:backend": "cd backend && npx jest --coverage",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && npm install",
+    "install:all": "npm run install:frontend && npm run install:backend && npm install",
+    "prepare": "husky"
+  }
+}
