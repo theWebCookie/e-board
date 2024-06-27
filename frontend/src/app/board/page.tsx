@@ -26,7 +26,7 @@ const tools: ITool[] = [
   { name: 'Gumka', icon: '/eraser.svg', type: 'eraser' },
 ];
 
-interface Element {
+interface IElement {
   x1: number;
   y1: number;
   x2: number;
@@ -34,7 +34,7 @@ interface Element {
   roughElement: Drawable | undefined;
 }
 
-interface Event {
+interface IEvent {
   clientX: number;
   clientY: number;
 }
@@ -63,7 +63,7 @@ function createElement(x1: number, y1: number, x2: number, y2: number, tool: str
 }
 
 const Board = () => {
-  const [elements, setElements] = useState<Element[]>([]);
+  const [elements, setElements] = useState<IElement[]>([]);
   const [drawing, setDrawing] = useState(false);
   const [activeTool, setActiveTool] = useState<string | null>('pointer');
 
@@ -75,14 +75,14 @@ const Board = () => {
     elements.forEach(({ roughElement }) => roughCanvas.draw(roughElement as Drawable));
   }, [elements]);
 
-  const handleMouseDown = (event: Event) => {
+  const handleMouseDown = (event: IEvent) => {
     setDrawing(true);
     const { clientX, clientY } = event;
     const element = createElement(clientX, clientY, clientX, clientY, activeTool);
-    setElements((prevState: Element[]) => [...prevState, element]);
+    setElements((prevState: IElement[]) => [...prevState, element]);
   };
 
-  const handleMouseMove = (event: Event) => {
+  const handleMouseMove = (event: IEvent) => {
     if (!drawing || !activeTool) return;
     const { clientX, clientY } = event;
     const index = elements.length - 1;

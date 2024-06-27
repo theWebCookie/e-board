@@ -2,13 +2,13 @@
 import './ToolPicker.css';
 import Tool from './Tool';
 import { ITool } from '@/app/board/page';
-interface IToolPicker {
+interface ToolPickerProps {
   tools: ITool[];
   activeTool: string | null;
   setActiveTool: (toolType: string) => void;
 }
 
-const ToolPicker: React.FC<IToolPicker> = ({ tools, activeTool, setActiveTool }) => {
+const ToolPicker: React.FC<ToolPickerProps> = ({ tools, activeTool, setActiveTool }) => {
   return (
     <div className='tool-picker'>
       {tools.map((tool, idx) => (
