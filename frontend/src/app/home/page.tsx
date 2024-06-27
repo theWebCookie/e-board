@@ -42,7 +42,6 @@ const cards: ICardWithUsers[] = [
 const Home = () => {
   return (
     <LayoutWithNav>
-      <h1>Home</h1>
       <section className='flex gap-5 items-center flex-wrap my-3'>
         {cards.map((card) => (
           <DashboardCard key={card.title} title={card.title} url={card.url} description={card.description} users={card.users} />
