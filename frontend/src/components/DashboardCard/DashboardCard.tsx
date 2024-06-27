@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 const DashboardCard: React.FC<ICardWithUsers> = ({ title, url, description, users }) => {
   return (
-    <Card className='max-w-xs'>
+    <Card className='max-w-xs h-48'>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
