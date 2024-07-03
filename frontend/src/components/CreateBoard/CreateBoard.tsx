@@ -12,6 +12,7 @@ import { Toaster } from '../ui/toaster';
 import { useToast } from '../ui/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { createBoardSchema } from './schema';
+import Image from 'next/image';
 
 const CreateBoard = () => {
   const form = useForm<z.infer<typeof createBoardSchema>>({
@@ -35,11 +36,11 @@ const CreateBoard = () => {
   };
 
   return (
-    <div className='max-w-2xl h-60 flex justify-center items-center bg-slate-200 rounded-lg'>
+    <div className='max-w-2xl h-60 flex justify-center items-center bg-slate-200 rounded-lg hover:hover:bg-slate-300 pointer transition duration-300'>
       <Dialog>
         <DialogTrigger asChild>
           <Button variant='outline' className='bg-slate-300 size-20 flex items-center justify-center rounded-full hover:bg-slate-500'>
-            <i className='fa-solid fa-plus'></i>
+            <Image src='/circle-plus.svg' alt='add button' width={60} height={60} />
           </Button>
         </DialogTrigger>
         <DialogContent className='sm:max-w-md'>
@@ -47,30 +48,32 @@ const CreateBoard = () => {
             <DialogTitle>Stwórz tablicę</DialogTitle>
             <DialogDescription>Ktokolwiek kto ma link może dołączyc do twojej tablicy.</DialogDescription>
           </DialogHeader>
-          <div className=''>
+          <div>
             <div>
               <Label htmlFor='name' className='sr-only'>
                 Nazwa
               </Label>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className='flex items-center gap-2'>
-                  <FormField
-                    control={form.control}
-                    name='boardName'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input placeholder='Nazwa' type='boardName' {...field} className='' />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <DialogFooter className='sm:justify-start'>
-                    <Button type='submit' variant='secondary'>
-                      Stwórz
-                    </Button>
-                  </DialogFooter>
+                  <div className='flex gap-2'>
+                    <FormField
+                      control={form.control}
+                      name='boardName'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input placeholder='Nazwa' type='text' {...field} className='' />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <DialogFooter className='sm:justify-start'>
+                      <Button type='submit' variant='secondary'>
+                        Stwórz
+                      </Button>
+                    </DialogFooter>
+                  </div>
                 </form>
               </Form>
             </div>
@@ -79,7 +82,7 @@ const CreateBoard = () => {
                 <Label htmlFor='link' className='sr-only'>
                   Link
                 </Label>
-                <Input id='link' defaultValue='/board/123as#$?1' readOnly />
+                <Input id='link' defaultValue='/board/123as#$?1' readOnly className='text-slate-400' />
               </div>
               <TooltipProvider>
                 <Tooltip>
