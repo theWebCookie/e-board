@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/node": "^20.14.10",
+    "express": "^4.19.2",
+    "serve-handler": "^6.1.5",
+    "uuid": "^10.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/serve-handler": "^6.1.4",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.10",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2"
+  }
+}
