@@ -1,5 +1,5 @@
 'use client';
-import { useState, useLayoutEffect } from 'react';
+import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
 import Arrow from '@/components/Arrow/Arrow';
 import BoardButton from '@/components/BoardButton/BoardButton';
 import ToolPicker from '@/components/ToolPicker/ToolPicker';
@@ -65,6 +65,7 @@ const Board = () => {
   const [elements, setElements] = useState<IElement[]>([]);
   const [drawing, setDrawing] = useState(false);
   const [activeTool, setActiveTool] = useState<string | null>('pointer');
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useLayoutEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -74,6 +75,17 @@ const Board = () => {
     elements.forEach(({ roughElement }) => roughCanvas.draw(roughElement as Drawable));
   }, [elements]);
 
+  useEffect(() => {
+    setDimensions({ width: window.innerWidth, height: window.innerHeight });
+
+    const handleResize = () => {
+      setDimensions({ width: window.innerWidth, height: window.innerHeight });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleMouseDown = (event: IEvent) => {
     setDrawing(true);
     const { clientX, clientY } = event;
@@ -81,28 +93,31 @@ const Board = () => {
     setElements((prevState: IElement[]) => [...prevState, element]);
   };
 
-  const handleMouseMove = (event: IEvent) => {
-    if (!drawing || !activeTool) return;
-    const { clientX, clientY } = event;
-    const index = elements.length - 1;
-    const { x1, y1 } = elements[index];
-    const updatedElement = createElement(x1, y1, clientX, clientY, activeTool);
-    const elementsCopy = [...elements];
-    elementsCopy[index] = updatedElement;
-    setElements(elementsCopy);
-  };
+  const handleMouseMove = useCallback(
+    (event: IEvent) => {
+      if (!drawing || !activeTool) return;
+      const { clientX, clientY } = event;
+      const index = elements.length - 1;
+      const { x1, y1 } = elements[index];
+      const updatedElement = createElement(x1, y1, clientX, clientY, activeTool);
+      const elementsCopy = [...elements];
+      elementsCopy[index] = updatedElement;
+      setElements(elementsCopy);
+    },
+    [drawing, activeTool, elements]
+  );
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setDrawing(false);
-  };
+  }, []);
 
   return (
     <div className='relative w-full h-screen'>
       <canvas
         id='canvas'
         className='w-full h-full relative'
-        width={window.innerWidth}
-        height={window.innerHeight}
+        width={dimensions.width}
+        height={dimensions.height}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
