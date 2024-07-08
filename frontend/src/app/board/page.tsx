@@ -3,7 +3,6 @@ import { useState, useLayoutEffect } from 'react';
 import Arrow from '@/components/Arrow/Arrow';
 import BoardButton from '@/components/BoardButton/BoardButton';
 import ToolPicker from '@/components/ToolPicker/ToolPicker';
-import './page.css';
 import rough from 'roughjs';
 import { Drawable } from 'roughjs/bin/core';
 import { Point } from 'roughjs/bin/geometry';
@@ -98,21 +97,22 @@ const Board = () => {
   };
 
   return (
-    <div className='board'>
+    <div className='relative w-full h-screen'>
       <canvas
         id='canvas'
+        className='w-full h-full relative'
         width={window.innerWidth}
         height={window.innerHeight}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       ></canvas>
-      <div className='toolbar'>
-        <Arrow className='arrow left' />
-        <ToolPicker tools={tools} activeTool={activeTool} setActiveTool={setActiveTool} />
+      <div className='flex items-center justify-center absolute top-7 left-7 w-full'>
+        <Arrow className='absolute left-2.5' />
+        <ToolPicker className='flex justify-center flex-grow mx-auto' tools={tools} activeTool={activeTool} setActiveTool={setActiveTool} />
       </div>
-      <Arrow className='arrow left chat-arrow' />
-      <BoardButton className='menu' alt='board-button' path='/board-button.svg' />
+      <Arrow className='absolute right-7 bottom-1/2 transform translate-y-1/2' />
+      <BoardButton className='absolute bottom-7 left-7' alt='board-button' path='/board-button.svg' />
     </div>
   );
 };

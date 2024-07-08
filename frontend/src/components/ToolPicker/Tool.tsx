@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import './Tool.css';
 
 interface ToolProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon: string;
@@ -17,7 +16,13 @@ const Tool: React.FC<ToolProps> = ({ icon, name, active, toolType, setActiveTool
   };
 
   return (
-    <button className={`tool ${active ? 'active' : ''}`} onClick={handleToolClick} title={name}>
+    <button
+      className={`flex items-center justify-center border-none p-1 rounded-lg cursor-pointer mx-1.25 transition duration-300 ${
+        active ? 'bg-[#e0dfff]' : 'bg-white hover:bg-[#ececf4]'
+      }`}
+      onClick={handleToolClick}
+      title={name}
+    >
       <Image src={icon} width={20} height={20} alt={name} />
     </button>
   );
