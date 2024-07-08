@@ -33,6 +33,7 @@ export function useWebSocket(url: string, options?: WebSocketOptions) {
     return () => {
       socket.close();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
   return ws;
