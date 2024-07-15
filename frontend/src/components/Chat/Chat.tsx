@@ -15,6 +15,7 @@ import { ScrollArea } from '../ui/scroll-area';
 
 interface IChatProps {
   boardName: string;
+  className: string;
 }
 
 export interface IMessage {
@@ -22,7 +23,7 @@ export interface IMessage {
   clientId: string;
 }
 
-const Chat: React.FC<IChatProps> = ({ boardName }) => {
+const Chat: React.FC<IChatProps> = ({ boardName, className }) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [clientId, setClientId] = useState<string | null>(null);
 
@@ -54,7 +55,7 @@ const Chat: React.FC<IChatProps> = ({ boardName }) => {
   };
 
   return (
-    <div className='w-80 p-3 bg-slate-100 h-screen'>
+    <div className={`w-80 p-3 pb-7 bg-slate-100 h-screen ${className}`}>
       <h1 className='mb-1'>{boardName}</h1>
       <Separator />
       <ScrollArea className='h-full rounded-md p-2'>

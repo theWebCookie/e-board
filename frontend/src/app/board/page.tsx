@@ -6,6 +6,7 @@ import ToolPicker from '@/components/ToolPicker/ToolPicker';
 import rough from 'roughjs';
 import { Drawable } from 'roughjs/bin/core';
 import { Point } from 'roughjs/bin/geometry';
+import Chat from '@/components/Chat/Chat';
 export interface ITool {
   name: string;
   icon: string;
@@ -66,6 +67,7 @@ const Board = () => {
   const [drawing, setDrawing] = useState(false);
   const [activeTool, setActiveTool] = useState<string | null>('pointer');
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useLayoutEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -111,8 +113,12 @@ const Board = () => {
     setDrawing(false);
   }, []);
 
+  const handleChatOpen = () => {
+    setIsChatOpen(!isChatOpen);
+  };
+
   return (
-    <div className='relative w-full h-screen'>
+    <div className='w-full h-screen'>
       <canvas
         id='canvas'
         className='w-full h-full relative'
@@ -126,7 +132,16 @@ const Board = () => {
         <Arrow className='absolute left-2.5' />
         <ToolPicker className='flex justify-center flex-grow mx-auto' tools={tools} activeTool={activeTool} setActiveTool={setActiveTool} />
       </div>
-      <Arrow className='absolute right-7 bottom-1/2 transform translate-y-1/2' />
+      <Arrow
+        className={`absolute right-0 bottom-1/2 translate-x-[-28px] translate-y-1/2 transition-transform ${
+          isChatOpen ? 'translate-x-[-348px] rotate-180' : ''
+        }`}
+        handleChatOpen={handleChatOpen}
+      />
+      <Chat
+        boardName='Mock Board'
+        className={`absolute top-0 right-0 transition-transform ${isChatOpen ? 'translate-x-0' : 'translate-x-[20rem]'}`}
+      />
       <BoardButton className='absolute bottom-7 left-7' alt='board-button' path='/board-button.svg' />
     </div>
   );
