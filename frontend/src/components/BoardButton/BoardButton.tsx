@@ -9,7 +9,7 @@ interface ArrowProps extends React.HTMLProps<HTMLButtonElement> {
 
 const BoardButton: React.FC<ArrowProps> = ({ className, path, alt }) => {
   return (
-    <button className={`board-button ${className}`}>
+    <button className={`board-button ${className}`} type='button'>
       <Image src={path} alt={alt} width={20} height={20} />
     </button>
   );

@@ -13,7 +13,7 @@ const Arrow: React.FC<ArrowProps> = ({ className, handleChatOpen }) => {
     }
   };
   return (
-    <button className={className} onClick={handleArrowClick}>
+    <button className={className} onClick={handleArrowClick} type='button'>
       <Image src='/arrow-button.svg' alt='Arrow' width={20} height={20} />
     </button>
   );
