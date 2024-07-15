@@ -134,7 +134,7 @@ const Board = () => {
       </div>
       <Arrow
         className={`absolute right-0 bottom-1/2 translate-x-[-28px] translate-y-1/2 transition-transform ${
-          isChatOpen ? 'translate-x-[-348px] rotate-180' : ''
+          isChatOpen ? 'translate-x-[-296px] rotate-180 z-10 bg-white size-12 rounded-full flex items-center justify-center' : ''
         }`}
         handleChatOpen={handleChatOpen}
       />
