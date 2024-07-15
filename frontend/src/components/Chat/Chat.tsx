@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 import Image from 'next/image';
 import { Form, FormField, FormControl, FormItem, FormMessage } from '../ui/form';
 import { Separator } from '../ui/separator';
@@ -11,6 +10,8 @@ import chatFormSchema from './schema';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { Textarea } from '../ui/textarea';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface IChatProps {
   boardName: string;
@@ -53,30 +54,32 @@ const Chat: React.FC<IChatProps> = ({ boardName }) => {
   };
 
   return (
-    <div>
-      <h1>{boardName}</h1>
+    <div className='w-80 p-3 bg-slate-100 h-screen'>
+      <h1 className='mb-1'>{boardName}</h1>
       <Separator />
-      <div>
-        <Messages messages={messages} currentClientId={clientId} />
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              name='message'
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder='Wiadomość..' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type='submit' disabled={!messageValue.trim()}>
-              <Image src='/send.svg' alt='send' width={20} height={20} />
-            </Button>
-          </form>
-        </Form>
-      </div>
+      <ScrollArea className='h-full rounded-md p-2'>
+        <div className='my-1'>
+          <Messages messages={messages} currentClientId={clientId} />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className='flex'>
+              <FormField
+                name='message'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea placeholder='Wiadomość..' {...field} className='resize-none min-h-fit h-auto' />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type='submit' disabled={!messageValue.trim()} className='mx-auto'>
+                <Image src='/send.svg' alt='send' width={20} height={20} />
+              </Button>
+            </form>
+          </Form>
+        </div>
+      </ScrollArea>
     </div>
   );
 };
