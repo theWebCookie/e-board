@@ -3,13 +3,13 @@ import './Arrow.css';
 
 interface ArrowProps extends React.HTMLProps<HTMLButtonElement> {
   className: string;
-  handleChatOpen?: () => void;
+  fn?: () => void;
 }
 
-const Arrow: React.FC<ArrowProps> = ({ className, handleChatOpen }) => {
+const Arrow: React.FC<ArrowProps> = ({ className, fn }) => {
   const handleArrowClick = () => {
-    if (handleChatOpen) {
-      handleChatOpen();
+    if (fn) {
+      fn();
     }
   };
   return (
