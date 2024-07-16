@@ -4,10 +4,9 @@ import Arrow from '@/components/Arrow/Arrow';
 import BoardButton from '@/components/BoardButton/BoardButton';
 import ToolPicker from '@/components/ToolPicker/ToolPicker';
 import rough from 'roughjs';
-import { Drawable } from 'roughjs/bin/core';
-import { Point } from 'roughjs/bin/geometry';
 import Chat from '@/components/Chat/Chat';
 import { useRouter } from 'next/navigation';
+import { adjustElementCoordinates, adjustmentRequired, createElement, drawElement, getMouseCoordinates, IElement, IEvent } from './utils';
 
 export interface ITool {
   name: string;
@@ -28,49 +27,14 @@ const tools: ITool[] = [
   { name: 'Gumka', icon: '/eraser.svg', type: 'eraser' },
 ];
 
-interface IElement {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  roughElement: Drawable | undefined;
-}
-
-interface IEvent {
-  clientX: number;
-  clientY: number;
-}
-
-const generator = rough.generator();
-
-function createElement(x1: number, y1: number, x2: number, y2: number, tool: string | null) {
-  switch (tool) {
-    case 'line':
-      return { x1, y1, x2, y2, roughElement: generator.line(x1, y1, x2, y2) };
-    case 'rectangle':
-      return { x1, y1, x2, y2, roughElement: generator.rectangle(x1, y1, x2 - x1, y2 - y1) };
-    case 'circle':
-      return { x1, y1, x2, y2, roughElement: generator.circle(x1, y1, x2 - x1) };
-    case 'diamond':
-      const points = [
-        [x1, y1 + (y2 - y1) / 2],
-        [x1 + (x2 - x1) / 2, y1],
-        [x2, y1 + (y2 - y1) / 2],
-        [x1 + (x2 - x1) / 2, y2],
-      ];
-      return { x1, y1, x2, y2, roughElement: generator.polygon(points as Point[]) };
-    default:
-      return { x1, y1, x2, y2, roughElement: undefined };
-  }
-}
-
 const Board = () => {
   const [elements, setElements] = useState<IElement[]>([]);
-  const [drawing, setDrawing] = useState(false);
-  const [activeTool, setActiveTool] = useState<string | null>('pointer');
+  const [tool, setTool] = useState<string>('pointer');
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(true);
+  const [selectedElement, setSelectedElement] = useState(null);
+  const [action, setAction] = useState('none');
 
   const router = useRouter();
   const handleGoBack = useCallback(() => router.back(), [router]);
@@ -78,11 +42,14 @@ const Board = () => {
   useLayoutEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
     const context = canvas.getContext('2d') as CanvasRenderingContext2D;
-    context.clearRect(0, 0, canvas.width, canvas.height);
     const roughCanvas = rough.canvas(canvas);
-    elements.forEach(({ roughElement }) => roughCanvas.draw(roughElement as Drawable));
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.save();
+    elements.forEach((element) => drawElement(roughCanvas, context, element));
+    context.restore();
     setIsHidden(false);
-  }, [elements]);
+  }, [elements, action]);
 
   useEffect(() => {
     setDimensions({ width: window.innerWidth, height: window.innerHeight });
@@ -95,30 +62,57 @@ const Board = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleMouseDown = (event: IEvent) => {
-    setDrawing(true);
-    const { clientX, clientY } = event;
-    const element = createElement(clientX, clientY, clientX, clientY, activeTool);
-    setElements((prevState: IElement[]) => [...prevState, element]);
+  const updateElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string) => {
+    const elementsCopy: IElement[] = [...elements];
+
+    switch (type) {
+      case 'line':
+      case 'circle':
+      case 'diamond':
+      case 'rectangle':
+        elementsCopy[id] = createElement(id, x1, y1, x2, y2, type);
+        break;
+      case 'pencil':
+        elementsCopy[id].points = [...elementsCopy[id].points, { x: x2, y: y2 }];
+        break;
+      default:
+        throw new Error(`Type not recognized: ${type}`);
+    }
+    setElements(elementsCopy);
   };
 
-  const handleMouseMove = useCallback(
-    (event: IEvent) => {
-      if (!drawing || !activeTool) return;
-      const { clientX, clientY } = event;
+  const handleMouseDown = (event: IEvent) => {
+    const { clientX, clientY } = getMouseCoordinates(event);
+    const id = elements.length;
+    const element = createElement(id, clientX, clientY, clientX, clientY, tool);
+    setElements((prevState) => [...prevState, element]);
+    setSelectedElement(element);
+
+    setAction(tool === 'text' ? 'writing' : 'drawing');
+  };
+
+  const handleMouseMove = (event: IEvent) => {
+    const { clientX, clientY } = getMouseCoordinates(event);
+    if (action === 'drawing') {
       const index = elements.length - 1;
       const { x1, y1 } = elements[index];
-      const updatedElement = createElement(x1, y1, clientX, clientY, activeTool);
-      const elementsCopy = [...elements];
-      elementsCopy[index] = updatedElement;
-      setElements(elementsCopy);
-    },
-    [drawing, activeTool, elements]
-  );
+      updateElement(index, x1, y1, clientX, clientY, tool);
+    }
+  };
 
-  const handleMouseUp = useCallback(() => {
-    setDrawing(false);
-  }, []);
+  const handleMouseUp = () => {
+    if (selectedElement) {
+      const index = selectedElement.id;
+      const { id, type } = elements[index];
+      if (action === 'drawing' && adjustmentRequired(type)) {
+        const { x1, y1, x2, y2 } = adjustElementCoordinates(elements[index]);
+        updateElement(id, x1, y1, x2, y2, type);
+      }
+    }
+
+    setAction('none');
+    setSelectedElement(null);
+  };
 
   const handleChatOpen = () => {
     setIsChatOpen(!isChatOpen);
@@ -137,7 +131,7 @@ const Board = () => {
       ></canvas>
       <div className='flex items-center justify-center absolute top-7 left-7 w-full'>
         <Arrow className='absolute left-2.5' fn={handleGoBack} />
-        <ToolPicker className='flex justify-center flex-grow mx-auto' tools={tools} activeTool={activeTool} setActiveTool={setActiveTool} />
+        <ToolPicker className='flex justify-center flex-grow mx-auto' tools={tools} activeTool={tool} setActiveTool={setTool} />
       </div>
       <Arrow
         className={`absolute right-0 bottom-1/2 translate-x-[-28px] translate-y-1/2 transition-transform ${
