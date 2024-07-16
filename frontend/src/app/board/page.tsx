@@ -70,6 +70,7 @@ const Board = () => {
       case 'circle':
       case 'diamond':
       case 'rectangle':
+      case 'arrow':
         elementsCopy[id] = createElement(id, x1, y1, x2, y2, type);
         break;
       case 'pencil':

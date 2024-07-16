@@ -40,6 +40,8 @@ export const createElement = (id: number, x1: number, y1: number, x2: number, y2
       return { id, type, x1, y1, x2, y2, roughElement: generator.polygon(points as Point[]) };
     case 'pencil':
       return { id, type, points: [{ x: x1, y: y1 }] };
+    case 'arrow':
+      return { id, type, x1, y1, x2, y2 };
     default:
       throw new Error(`Type not recognized: ${type}`);
   }
@@ -71,6 +73,24 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
     case 'pencil':
       const stroke = getSvgPathFromStroke(getStroke(element.points));
       context.fill(new Path2D(stroke));
+      break;
+    case 'arrow':
+      const headLength = 10;
+      const startX = element.x1;
+      const startY = element.y1;
+      const endX = element.x2;
+      const endY = element.y2;
+      const angle = Math.atan2(endY - startY, endX - startX);
+
+      roughCanvas.line(startX, startY, endX, endY);
+      roughCanvas.line(endX, endY, endX - headLength * Math.cos(angle - Math.PI / 6), endY - headLength * Math.sin(angle - Math.PI / 6), {
+        stroke: 'black',
+        strokeWidth: 2,
+      });
+      roughCanvas.line(endX, endY, endX - headLength * Math.cos(angle + Math.PI / 6), endY - headLength * Math.sin(angle + Math.PI / 6), {
+        stroke: 'black',
+        strokeWidth: 2,
+      });
       break;
     default:
       throw new Error(`Type not recognized: ${element.type}`);
