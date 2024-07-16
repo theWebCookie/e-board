@@ -7,6 +7,8 @@ import rough from 'roughjs';
 import { Drawable } from 'roughjs/bin/core';
 import { Point } from 'roughjs/bin/geometry';
 import Chat from '@/components/Chat/Chat';
+import { useRouter } from 'next/navigation';
+
 export interface ITool {
   name: string;
   icon: string;
@@ -68,6 +70,10 @@ const Board = () => {
   const [activeTool, setActiveTool] = useState<string | null>('pointer');
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isHidden, setIsHidden] = useState(true);
+
+  const router = useRouter();
+  const handleGoBack = useCallback(() => router.back(), [router]);
 
   useLayoutEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -75,6 +81,7 @@ const Board = () => {
     context.clearRect(0, 0, canvas.width, canvas.height);
     const roughCanvas = rough.canvas(canvas);
     elements.forEach(({ roughElement }) => roughCanvas.draw(roughElement as Drawable));
+    setIsHidden(false);
   }, [elements]);
 
   useEffect(() => {
@@ -129,18 +136,18 @@ const Board = () => {
         onMouseUp={handleMouseUp}
       ></canvas>
       <div className='flex items-center justify-center absolute top-7 left-7 w-full'>
-        <Arrow className='absolute left-2.5' />
+        <Arrow className='absolute left-2.5' fn={handleGoBack} />
         <ToolPicker className='flex justify-center flex-grow mx-auto' tools={tools} activeTool={activeTool} setActiveTool={setActiveTool} />
       </div>
       <Arrow
         className={`absolute right-0 bottom-1/2 translate-x-[-28px] translate-y-1/2 transition-transform ${
           isChatOpen ? 'translate-x-[-296px] rotate-180 z-10 bg-white size-12 rounded-full flex items-center justify-center' : ''
         }`}
-        handleChatOpen={handleChatOpen}
+        fn={handleChatOpen}
       />
       <Chat
         boardName='Mock Board'
-        className={`absolute top-0 right-0 transition-transform ${isChatOpen ? 'translate-x-0' : 'translate-x-[20rem]'}`}
+        className={`absolute top-0 right-0 transition-transform ${isChatOpen ? 'translate-x-0' : 'translate-x-[20rem]'} ${isHidden ? 'hidden' : ''}`}
       />
       <BoardButton className='absolute bottom-7 left-7' alt='board-button' path='/board-button.svg' />
     </div>
