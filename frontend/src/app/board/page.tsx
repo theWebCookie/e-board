@@ -7,6 +7,7 @@ import rough from 'roughjs';
 import Chat from '@/components/Chat/Chat';
 import { useRouter } from 'next/navigation';
 import { adjustElementCoordinates, adjustmentRequired, createElement, drawElement, getMouseCoordinates, IElement, IEvent } from './utils';
+import ToolMenu from '@/components/ToolMenu/ToolMenu';
 
 export interface ITool {
   name: string;
@@ -119,6 +120,8 @@ const Board = () => {
     setIsChatOpen(!isChatOpen);
   };
 
+  const isToolMenuOpen = tool === 'pointer' || tool === 'eraser' || tool === 'image' ? false : true;
+
   return (
     <div className='w-full h-screen'>
       <canvas
@@ -144,6 +147,7 @@ const Board = () => {
         boardName='Mock Board'
         className={`absolute top-0 right-0 transition-transform ${isChatOpen ? 'translate-x-0' : 'translate-x-[20rem]'} ${isHidden ? 'hidden' : ''}`}
       />
+      <ToolMenu className={`absolute top-1/3 left-7 border-2 rounded ${isToolMenuOpen ? '' : 'hidden'}`} />
       <BoardButton className='absolute bottom-7 left-7' alt='board-button' path='/board-button.svg' />
     </div>
   );
