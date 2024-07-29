@@ -28,6 +28,16 @@ const tools: ITool[] = [
   { name: 'Gumka', icon: '/eraser.svg', type: 'eraser' },
 ];
 
+export interface IOptions {
+  roughness: string;
+  seed: number;
+  bowing: string;
+  fill: string;
+  stroke: string;
+  strokeWidth: string;
+  fillStyle: string;
+}
+
 const Board = () => {
   const [elements, setElements] = useState<IElement[]>([]);
   const [tool, setTool] = useState<string>('pointer');
@@ -36,6 +46,19 @@ const Board = () => {
   const [isHidden, setIsHidden] = useState(true);
   const [selectedElement, setSelectedElement] = useState(null);
   const [action, setAction] = useState('none');
+
+  const seed = Math.floor(Math.random() * 2 ** 31);
+  const [options, setOptions] = useState<IOptions>({
+    roughness: '1.2',
+    seed,
+    bowing: '2',
+    fill: 'transparent',
+    stroke: '#000000',
+    strokeWidth: '2',
+    fillStyle: 'solid',
+  });
+
+  console.log(options);
 
   const router = useRouter();
   const handleGoBack = useCallback(() => router.back(), [router]);
@@ -52,12 +75,12 @@ const Board = () => {
     setIsHidden(false);
   }, [elements, action]);
 
-  useEffect(() => {
-    setDimensions({ width: window.innerWidth, height: window.innerHeight });
-
+  useLayoutEffect(() => {
     const handleResize = () => {
       setDimensions({ width: window.innerWidth, height: window.innerHeight });
     };
+
+    handleResize();
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -135,7 +158,7 @@ const Board = () => {
       ></canvas>
       <div className='flex items-center justify-center absolute top-7 left-7 w-full'>
         <Arrow className='absolute left-2.5' fn={handleGoBack} />
-        <ToolPicker className='flex justify-center flex-grow mx-auto' tools={tools} activeTool={tool} setActiveTool={setTool} />
+        <ToolPicker className='flex justify-center flex-grow mx-auto' activeTool={tool} setActiveTool={setTool} tools={tools} />
       </div>
       <Arrow
         className={`absolute right-0 bottom-1/2 translate-x-[-28px] translate-y-1/2 transition-transform ${
@@ -147,7 +170,7 @@ const Board = () => {
         boardName='Mock Board'
         className={`absolute top-0 right-0 transition-transform ${isChatOpen ? 'translate-x-0' : 'translate-x-[20rem]'} ${isHidden ? 'hidden' : ''}`}
       />
-      <ToolMenu className={`absolute top-1/3 left-7 border-2 rounded ${isToolMenuOpen ? '' : 'hidden'}`} />
+      <ToolMenu className={`absolute top-1/3 left-7 border-2 rounded ${isToolMenuOpen ? '' : 'hidden'}`} options={options} setOptions={setOptions} />
       <BoardButton className='absolute bottom-7 left-7' alt='board-button' path='/board-button.svg' />
     </div>
   );
