@@ -31,6 +31,7 @@ const ToolMenuItem: React.FC<ToolMenuItemProps> = ({ text, buttons, colors, name
           {colors.map((color, idx) => (
             <MenuInput key={idx} className='' color={color} name={name} />
           ))}
+          <input type='color' className='cursor-pointer size-7 border-0 bg-transparent' />
         </div>
       </li>
     );
