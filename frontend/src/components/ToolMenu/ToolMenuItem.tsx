@@ -10,16 +10,27 @@ interface ToolMenuItemProps {
   opacity?: number;
   options: IOptions;
   setOptions: (options: IOptions) => void;
+  setActiveTools: (activeTools: { [key: string]: string }) => void;
+  activeTools: { [key: string]: string };
 }
 
-const ToolMenuItem: React.FC<ToolMenuItemProps> = ({ text, buttons, colors, name, opacity, options, setOptions }) => {
+const ToolMenuItem: React.FC<ToolMenuItemProps> = ({ text, buttons, colors, name, opacity, options, setOptions, setActiveTools, activeTools }) => {
   if (buttons) {
     return (
       <li className='mt-2'>
         <h3 className='font-normal text-[#1b1b1f] m-0 mb-1'>{text}</h3>
         <div className='flex space-x-1'>
           {buttons.map((button, idx) => (
-            <MenuInput key={idx} value={button.value} image={button.image} name={name} setOptions={setOptions} />
+            <MenuInput
+              key={idx}
+              value={button.value}
+              image={button.image}
+              name={name}
+              id={`${name}-${idx}`}
+              setOptions={setOptions}
+              setActiveTools={setActiveTools}
+              activeTools={activeTools}
+            />
           ))}
         </div>
       </li>
@@ -32,7 +43,16 @@ const ToolMenuItem: React.FC<ToolMenuItemProps> = ({ text, buttons, colors, name
         <h3 className='font-normal text-[#1b1b1f] m-0 mb-1'>{text}</h3>
         <div className='flex space-x-1'>
           {colors.map((color, idx) => (
-            <MenuInput key={idx} value={color} color={color} name={name} setOptions={setOptions} />
+            <MenuInput
+              key={idx}
+              value={color}
+              color={color}
+              name={name}
+              id={`${name}-${idx}`}
+              setOptions={setOptions}
+              setActiveTools={setActiveTools}
+              activeTools={activeTools}
+            />
           ))}
           <input
             type='color'

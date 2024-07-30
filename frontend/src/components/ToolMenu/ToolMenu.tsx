@@ -1,5 +1,6 @@
 import { IOptions } from '@/app/board/page';
 import ToolMenuItem from './ToolMenuItem';
+import { useState } from 'react';
 
 interface ToolMenuProps {
   className: string;
@@ -26,14 +27,14 @@ const items = [
       { image: '/stroke_1.svg', value: '10, 5' },
       { image: '/stroke_2.svg', value: '2, 2' },
     ],
-    name: 'strokeStyle',
+    name: 'strokeLineDash',
   },
   {
     text: 'Styl elementu',
     buttons: [
-      { image: '/sloppiness_0.svg', value: '1' },
+      { image: '/sloppiness_0.svg', value: '0' },
       { image: '/sloppiness_1.svg', value: '1.2' },
-      { image: '/sloppiness_2.svg', value: '1.5 ' },
+      { image: '/sloppiness_2.svg', value: '2.4 ' },
     ],
     name: 'roughness',
   },
@@ -41,8 +42,16 @@ const items = [
 ];
 
 const ToolMenu: React.FC<ToolMenuProps> = ({ className, options, setOptions }) => {
+  const [activeTools, setActiveTools] = useState({
+    stroke: 'stroke-0',
+    fill: 'fill-0',
+    strokeWidth: 'strokeWidth-0',
+    strokeLineDash: 'strokeLineDash-0',
+    roughness: 'roughness-0',
+  });
+
   return (
-    <div className={`p-3 rounded-md ${className}`}>
+    <div className={`p-3 rounded-md bg-white ${className}`}>
       <ul>
         {items.map((item, idx) => (
           <ToolMenuItem
@@ -54,6 +63,8 @@ const ToolMenu: React.FC<ToolMenuProps> = ({ className, options, setOptions }) =
             opacity={item.value}
             options={options}
             setOptions={setOptions}
+            activeTools={activeTools}
+            setActiveTools={setActiveTools}
           />
         ))}
       </ul>

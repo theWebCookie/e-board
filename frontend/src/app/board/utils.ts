@@ -3,6 +3,7 @@ import rough from 'roughjs';
 import { RoughCanvas } from 'roughjs/bin/canvas';
 import { Drawable } from 'roughjs/bin/core';
 import { Point } from 'roughjs/bin/geometry';
+import { IOptions } from './page';
 
 export interface IElement {
   x1: number;
@@ -22,14 +23,41 @@ export interface IEvent {
 
 const generator = rough.generator();
 
-export const createElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string) => {
+interface INewOptions {
+  roughness: number;
+  seed: number;
+  bowing: number;
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
+  fillStyle: string;
+  strokeLineDash: number[] | string[];
+}
+
+const pencilStrokeOptions = { size: 3, thinning: 0.7, simulatePressure: true };
+
+const formatOptions = (options: IOptions): INewOptions => {
+  return {
+    bowing: 2,
+    fillStyle: 'solid',
+    roughness: parseFloat(options.roughness),
+    seed: options.seed,
+    fill: options.fill,
+    stroke: options.stroke,
+    strokeWidth: parseInt(options.strokeWidth),
+    strokeLineDash: options.strokeLineDash === '' ? options.strokeLineDash.split(',') : options.strokeLineDash.split(',').map((x) => parseInt(x)),
+  };
+};
+
+export const createElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string, options: IOptions) => {
+  const newOptions = formatOptions(options);
   switch (type) {
     case 'line':
-      return { id, type, x1, y1, x2, y2, roughElement: generator.line(x1, y1, x2, y2) };
+      return { id, type, x1, y1, x2, y2, roughElement: generator.line(x1, y1, x2, y2, newOptions) };
     case 'rectangle':
-      return { id, type, x1, y1, x2, y2, roughElement: generator.rectangle(x1, y1, x2 - x1, y2 - y1) };
+      return { id, type, x1, y1, x2, y2, roughElement: generator.rectangle(x1, y1, x2 - x1, y2 - y1, newOptions) };
     case 'circle':
-      return { id, type, x1, y1, x2, y2, roughElement: generator.circle(x1, y1, x2 - x1) };
+      return { id, type, x1, y1, x2, y2, roughElement: generator.circle(x1, y1, x2 - x1, newOptions) };
     case 'diamond':
       const points = [
         [x1, y1 + (y2 - y1) / 2],
@@ -37,7 +65,7 @@ export const createElement = (id: number, x1: number, y1: number, x2: number, y2
         [x2, y1 + (y2 - y1) / 2],
         [x1 + (x2 - x1) / 2, y2],
       ];
-      return { id, type, x1, y1, x2, y2, roughElement: generator.polygon(points as Point[]) };
+      return { id, type, x1, y1, x2, y2, roughElement: generator.polygon(points as Point[], newOptions) };
     case 'pencil':
       return { id, type, points: [{ x: x1, y: y1 }] };
     case 'arrow':
@@ -71,7 +99,7 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       roughCanvas.draw(element.roughElement);
       break;
     case 'pencil':
-      const stroke = getSvgPathFromStroke(getStroke(element.points));
+      const stroke = getSvgPathFromStroke(getStroke(element.points, pencilStrokeOptions));
       context.fill(new Path2D(stroke));
       break;
     case 'arrow':

@@ -31,11 +31,10 @@ const tools: ITool[] = [
 export interface IOptions {
   roughness: string;
   seed: number;
-  bowing: string;
   fill: string;
   stroke: string;
   strokeWidth: string;
-  fillStyle: string;
+  strokeLineDash: string;
 }
 
 const Board = () => {
@@ -50,15 +49,12 @@ const Board = () => {
   const seed = Math.floor(Math.random() * 2 ** 31);
   const [options, setOptions] = useState<IOptions>({
     roughness: '1.2',
-    seed,
-    bowing: '2',
+    seed: seed,
     fill: 'transparent',
     stroke: '#000000',
     strokeWidth: '2',
-    fillStyle: 'solid',
+    strokeLineDash: '',
   });
-
-  console.log(options);
 
   const router = useRouter();
   const handleGoBack = useCallback(() => router.back(), [router]);
@@ -95,7 +91,7 @@ const Board = () => {
       case 'diamond':
       case 'rectangle':
       case 'arrow':
-        elementsCopy[id] = createElement(id, x1, y1, x2, y2, type);
+        elementsCopy[id] = createElement(id, x1, y1, x2, y2, type, options);
         break;
       case 'pencil':
         elementsCopy[id].points = [...elementsCopy[id].points, { x: x2, y: y2 }];
@@ -109,7 +105,7 @@ const Board = () => {
   const handleMouseDown = (event: IEvent) => {
     const { clientX, clientY } = getMouseCoordinates(event);
     const id = elements.length;
-    const element = createElement(id, clientX, clientY, clientX, clientY, tool);
+    const element = createElement(id, clientX, clientY, clientX, clientY, tool, options);
     setElements((prevState) => [...prevState, element]);
     setSelectedElement(element);
 
