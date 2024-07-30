@@ -35,6 +35,7 @@ export interface IOptions {
   stroke: string;
   strokeWidth: string;
   strokeLineDash: string;
+  opacity: string;
 }
 
 const Board = () => {
@@ -55,6 +56,7 @@ const Board = () => {
     stroke: '#000000',
     strokeWidth: '2',
     strokeLineDash: '',
+    opacity: '1',
   });
 
   const router = useRouter();

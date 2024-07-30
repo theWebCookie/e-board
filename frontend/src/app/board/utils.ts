@@ -36,18 +36,32 @@ interface INewOptions {
 
 const pencilStrokeOptions = { size: 3, thinning: 0.7, simulatePressure: true };
 
-const formatOptions = (options: IOptions): INewOptions => {
-  return {
-    bowing: 2,
-    fillStyle: 'solid',
-    roughness: parseFloat(options.roughness),
-    seed: options.seed,
-    fill: options.fill,
-    stroke: options.stroke,
-    strokeWidth: parseInt(options.strokeWidth),
-    strokeLineDash: options.strokeLineDash === '' ? options.strokeLineDash.split(',') : options.strokeLineDash.split(',').map((x) => parseInt(x)),
-  };
+const hexToRgb = (hex: string) => {
+  // group hex string into 3 groups (r, g, b) and parse them to integers
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : { r: 0, g: 0, b: 0 };
 };
+
+const convertedColor = (option: string, opacity: number) => {
+  return `rgba(${hexToRgb(option).r}, ${hexToRgb(option).g}, ${hexToRgb(option).b}, ${opacity})`;
+};
+
+const formatOptions = (options: IOptions): INewOptions => ({
+  bowing: 2,
+  fillStyle: 'solid',
+  roughness: parseFloat(options.roughness),
+  seed: options.seed,
+  fill: options.fill === 'transparent' ? 'rgba(0,0,0,0)' : convertedColor(options.fill, parseFloat(options.opacity)),
+  stroke: convertedColor(options.stroke, parseFloat(options.opacity)),
+  strokeWidth: parseInt(options.strokeWidth),
+  strokeLineDash: options.strokeLineDash === '' ? options.strokeLineDash.split(',') : options.strokeLineDash.split(',').map((x) => parseInt(x)),
+});
 
 export const createElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string, options: IOptions) => {
   const newOptions = formatOptions(options);

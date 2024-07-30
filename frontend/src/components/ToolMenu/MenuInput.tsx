@@ -1,6 +1,7 @@
 import { IOptions } from '@/app/board/page';
 import Image from 'next/image';
 import { ChangeEvent } from 'react';
+import { ActiveTools } from './ToolMenuItem';
 
 interface MenuInputProps {
   className?: string;
@@ -11,7 +12,7 @@ interface MenuInputProps {
   id: string;
   setOptions: (options: IOptions) => void;
   setActiveTools: (activeTools: { [key: string]: string }) => void;
-  activeTools: { [key: string]: string };
+  activeTools: ActiveTools;
 }
 
 const MenuInput: React.FC<MenuInputProps> = ({ className, image, name, color, value, id, setOptions, setActiveTools, activeTools }) => {
@@ -19,7 +20,7 @@ const MenuInput: React.FC<MenuInputProps> = ({ className, image, name, color, va
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setOptions((prevOptions: IOptions) => ({ ...prevOptions, [name]: e.target.value }));
-    setActiveTools((prevActiveTools: { [key: string]: string }) => ({ ...prevActiveTools, [name]: id }));
+    setActiveTools((prevActiveTools: ActiveTools) => ({ ...prevActiveTools, [name]: id }));
   };
 
   if (image) {

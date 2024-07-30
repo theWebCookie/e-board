@@ -1,5 +1,14 @@
 import { IOptions } from '@/app/board/page';
 import MenuInput from './MenuInput';
+import { ChangeEvent, useState } from 'react';
+
+export interface ActiveTools {
+  stroke: string;
+  fill: string;
+  strokeWidth: string;
+  strokeLineDash: string;
+  roughness: string;
+}
 
 interface ToolMenuItemProps {
   text: string;
@@ -10,11 +19,18 @@ interface ToolMenuItemProps {
   opacity?: number;
   options: IOptions;
   setOptions: (options: IOptions) => void;
-  setActiveTools: (activeTools: { [key: string]: string }) => void;
-  activeTools: { [key: string]: string };
+  setActiveTools: (activeTools: ActiveTools) => void;
+  activeTools: ActiveTools;
 }
 
 const ToolMenuItem: React.FC<ToolMenuItemProps> = ({ text, buttons, colors, name, opacity, options, setOptions, setActiveTools, activeTools }) => {
+  const [value, setValue] = useState<number>(1);
+
+  const handleOpacityChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setValue(Number(e.target.value));
+    setOptions((prevOptions: IOptions) => ({ ...prevOptions, [name]: e.target.value }));
+  };
+
   if (buttons) {
     return (
       <li className='mt-2'>
@@ -54,11 +70,22 @@ const ToolMenuItem: React.FC<ToolMenuItemProps> = ({ text, buttons, colors, name
               activeTools={activeTools}
             />
           ))}
-          <input
-            type='color'
-            className='cursor-pointer size-7 border-0 bg-transparent'
-            value={name === 'fillColor' ? options.fill : options.stroke}
-          />
+          {name === 'fill' && (
+            <input
+              type='color'
+              className='cursor-pointer size-7 border-0 bg-transparent'
+              value={options.fill}
+              onChange={(e) => setOptions((prevOptions: IOptions) => ({ ...prevOptions, [name]: e.target.value }))}
+            />
+          )}
+          {name === 'stroke' && (
+            <input
+              type='color'
+              className='cursor-pointer size-7 border-0 bg-transparent'
+              value={options.stroke}
+              onChange={(e) => setOptions((prevOptions: IOptions) => ({ ...prevOptions, [name]: e.target.value }))}
+            />
+          )}
         </div>
       </li>
     );
@@ -68,7 +95,7 @@ const ToolMenuItem: React.FC<ToolMenuItemProps> = ({ text, buttons, colors, name
     return (
       <li className='mt-2'>
         <h3 className='font-normal text-[#1b1b1f] m-0 mb-1'>{text}</h3>
-        <input type='range' min='0' max='1' step='0.1' value={opacity} className='w-full' />
+        <input type='range' min='0' max='1' step='0.01' value={value} onChange={(e) => handleOpacityChange(e)} className='w-full' />
       </li>
     );
   }
