@@ -45,6 +45,7 @@ const Board = () => {
   const [isHidden, setIsHidden] = useState(true);
   const [selectedElement, setSelectedElement] = useState(null);
   const [action, setAction] = useState('none');
+  const [dataURL, setDataURL] = useState('');
 
   const seed = Math.floor(Math.random() * 2 ** 31);
   const [options, setOptions] = useState<IOptions>({
@@ -63,6 +64,8 @@ const Board = () => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
     const context = canvas.getContext('2d') as CanvasRenderingContext2D;
     const roughCanvas = rough.canvas(canvas);
+    const url = canvas.toDataURL();
+    setDataURL(url);
 
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.save();
@@ -81,6 +84,16 @@ const Board = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = dataURL;
+    img.onload = function () {
+      const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+      const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+      context.drawImage(img, 0, 0);
+    };
+  }, [dimensions]);
 
   const updateElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string) => {
     const elementsCopy: IElement[] = [...elements];
