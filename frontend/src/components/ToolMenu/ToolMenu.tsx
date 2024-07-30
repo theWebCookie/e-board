@@ -9,8 +9,8 @@ interface ToolMenuProps {
 }
 
 const items = [
-  { text: 'Obramowanie', colors: ['#000', '#f00', '#0f0', '#00f'], name: 'stroke' },
-  { text: 'Tło', colors: ['#000', '#f00', '#0f0', '#00f'], name: 'fill' },
+  { text: 'Obramowanie', colors: ['#000000', '#ff0000', '#00ff00', '#0000ff'], name: 'stroke' },
+  { text: 'Tło', colors: ['transparent', '#ff0000', '#00ff00', '#0000ff'], name: 'fill' },
   {
     text: 'Szerokość obramowania',
     buttons: [
