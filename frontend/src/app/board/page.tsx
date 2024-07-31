@@ -95,6 +95,7 @@ const Board = () => {
       const context = canvas.getContext('2d') as CanvasRenderingContext2D;
       context.drawImage(img, 0, 0);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensions]);
 
   const updateElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string) => {

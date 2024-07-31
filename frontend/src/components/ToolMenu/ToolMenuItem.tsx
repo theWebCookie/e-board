@@ -2,7 +2,7 @@ import { IOptions } from '@/app/board/page';
 import MenuInput from './MenuInput';
 import { ChangeEvent, useState } from 'react';
 
-export interface ActiveTools {
+export interface ActiveTools extends Record<string, any> {
   stroke: string;
   fill: string;
   strokeWidth: string;
@@ -18,7 +18,7 @@ interface ToolMenuItemProps {
   name: string;
   opacity?: number;
   options: IOptions;
-  setOptions: (options: IOptions) => void;
+  setOptions: (options: any) => void;
   setActiveTools: (activeTools: ActiveTools) => void;
   activeTools: ActiveTools;
 }

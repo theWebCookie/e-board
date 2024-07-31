@@ -31,7 +31,7 @@ interface INewOptions {
   stroke: string;
   strokeWidth: number;
   fillStyle: string;
-  strokeLineDash: number[] | string[];
+  strokeLineDash: number[];
 }
 
 const pencilStrokeOptions = { size: 3, thinning: 0.7, simulatePressure: true };
@@ -60,7 +60,7 @@ const formatOptions = (options: IOptions): INewOptions => ({
   fill: options.fill === 'transparent' ? 'rgba(0,0,0,0)' : convertedColor(options.fill, parseFloat(options.opacity)),
   stroke: convertedColor(options.stroke, parseFloat(options.opacity)),
   strokeWidth: parseInt(options.strokeWidth),
-  strokeLineDash: options.strokeLineDash === '' ? options.strokeLineDash.split(',') : options.strokeLineDash.split(',').map((x) => parseInt(x)),
+  strokeLineDash: options.strokeLineDash === '' ? [] : options.strokeLineDash.split(',').map((x) => parseInt(x)),
 });
 
 export const createElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string, options: IOptions) => {

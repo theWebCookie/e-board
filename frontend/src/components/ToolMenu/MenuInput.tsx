@@ -10,8 +10,8 @@ interface MenuInputProps {
   name: string;
   value: string;
   id: string;
-  setOptions: (options: IOptions) => void;
-  setActiveTools: (activeTools: { [key: string]: string }) => void;
+  setOptions: (options: any) => void;
+  setActiveTools: (activeTools: any) => void;
   activeTools: ActiveTools;
 }
 
