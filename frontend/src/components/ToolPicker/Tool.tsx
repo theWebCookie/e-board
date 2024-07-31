@@ -22,8 +22,9 @@ const Tool: React.FC<ToolProps> = ({ icon, name, active, toolType, setActiveTool
       }`}
       onClick={handleToolClick}
       title={name}
+      type='button'
     >
-      <Image src={icon} width={20} height={20} alt={name} />
+      <Image src={icon} width={20} height={20} alt={name} priority={true} />
     </button>
   );
 };
