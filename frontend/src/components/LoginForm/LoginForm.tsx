@@ -39,12 +39,9 @@ const LoginForm = () => {
       toast({
         title: 'Zalogowano pomyślnie 😊',
         description: `Witaj ${values.email}`,
-        duration: 1000,
+        duration: 800,
       });
-
-      setTimeout(() => {
-        router.push('/home');
-      }, 1000);
+      router.push('/home');
     }
   };
   return (
