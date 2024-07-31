@@ -76,7 +76,7 @@ const LoginForm = () => {
             )}
           />
           <Button type='submit' className='w-full'>
-            Login
+            Zaloguj
           </Button>
           <Separator />
         </form>
