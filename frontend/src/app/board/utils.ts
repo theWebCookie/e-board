@@ -89,7 +89,7 @@ export const createElement = (id: number, x1: number, y1: number, x2: number, y2
   }
 };
 
-export const getSvgPathFromStroke = (stroke: any[]) => {
+export const getSvgPathFromStroke = (stroke: number[][]) => {
   if (!stroke.length) return '';
   const d = stroke.reduce(
     (acc, [x0, y0]: number[], i: number, arr) => {
