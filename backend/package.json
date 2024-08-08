@@ -13,12 +13,14 @@
   "dependencies": {
     "@prisma/client": "^5.17.0",
     "@types/node": "^20.14.10",
+    "bcrypt": "^5.1.1",
     "express": "^4.19.2",
     "serve-handler": "^6.1.5",
     "uuid": "^10.0.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
     "@types/serve-handler": "^6.1.4",
     "@types/uuid": "^10.0.0",

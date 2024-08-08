@@ -14,6 +14,59 @@ datasource db {
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  name    String?
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  hashed_password String @unique
+
+  boards UsersOnBoards[]
+}
+
+model Board {
+  id Int @id @default(autoincrement())
+  name String
+  content String
+  authorId Int
+
+  users UsersOnBoards[]
+  chat Chat[]
+  boardInvite BoardInvite[]
+}
+
+model UsersOnBoards {
+  userId Int
+  boardId Int
+  User User @relation(fields: [userId], references: [id])
+  Board Board @relation(fields: [boardId], references: [id])
+
+  @@id([userId, boardId])
+}
+
+model BoardInvite {
+  id Int @id @default(autoincrement())
+  boardId Int
+  code String
+  inviteActive Boolean
+
+  board Board @relation(fields: [boardId], references: [id])
+}
+
+// uzytkownik ma link, ktory moze przekazac innym, ktorzy moga dolaczyc do jego boarda, wklejajac kod w formularz, w ktorym sprawdzana jest poprawnosc kodu, jesli jest poprawny to dodaje go do boarda
+
+
+model Message {
+  id Int @id @default(autoincrement())
+  message String
+  userId Int
+
+  Chat Chat[]
+}
+
+model Chat {
+  id Int @id @default(autoincrement())
+  content String
+  boardId Int
+
+  board Board @relation(fields: [boardId], references: [id])
+  messages Message[]
 }
