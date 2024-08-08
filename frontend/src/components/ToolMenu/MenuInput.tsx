@@ -1,4 +1,4 @@
-import { IOptions } from '@/app/board/page';
+import { IOptions } from '@/app/board/[id]/page';
 import Image from 'next/image';
 import { ChangeEvent } from 'react';
 import { ActiveTools } from './ToolMenuItem';

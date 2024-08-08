@@ -6,8 +6,9 @@ import ToolPicker from '@/components/ToolPicker/ToolPicker';
 import rough from 'roughjs';
 import Chat from '@/components/Chat/Chat';
 import { useRouter } from 'next/navigation';
-import { adjustElementCoordinates, adjustmentRequired, createElement, drawElement, getMouseCoordinates, IElement, IEvent } from './utils';
+import { adjustElementCoordinates, adjustmentRequired, createElement, drawElement, getMouseCoordinates, IElement, IEvent } from '../utils';
 import ToolMenu from '@/components/ToolMenu/ToolMenu';
+import { defaultOptions } from '@config';
 
 export interface ITool {
   name: string;
@@ -38,7 +39,11 @@ export interface IOptions {
   opacity: string;
 }
 
-const Board = () => {
+interface IBoardProps {
+  params: { id: string };
+}
+
+const Board: React.FC<IBoardProps> = ({ params }) => {
   const [elements, setElements] = useState<IElement[]>([]);
   const [tool, setTool] = useState<string>('pointer');
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -47,24 +52,21 @@ const Board = () => {
   const [selectedElement, setSelectedElement] = useState(null);
   const [action, setAction] = useState('none');
   const [dataURL, setDataURL] = useState('');
+  const [canvasContext, setCanvasContext] = useState(null);
 
+  console.log(`Board id: ${params.id}`);
   const seed = Math.floor(Math.random() * 2 ** 31);
-  const [options, setOptions] = useState<IOptions>({
-    roughness: '1.2',
-    seed: seed,
-    fill: 'transparent',
-    stroke: '#000000',
-    strokeWidth: '2',
-    strokeLineDash: '',
-    opacity: '1',
-  });
+  const newOptions = { ...defaultOptions, seed };
+  const [options, setOptions] = useState<IOptions>(newOptions);
 
   const router = useRouter();
   const handleGoBack = useCallback(() => router.back(), [router]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
     const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+    setCanvasContext(context);
+
     const roughCanvas = rough.canvas(canvas);
     const url = canvas.toDataURL();
     setDataURL(url);
@@ -74,6 +76,7 @@ const Board = () => {
     elements.forEach((element) => drawElement(roughCanvas, context, element));
     context.restore();
     setIsHidden(false);
+    // fetchData();
   }, [elements, action]);
 
   useLayoutEffect(() => {
@@ -111,6 +114,9 @@ const Board = () => {
         break;
       case 'pencil':
         elementsCopy[id].points = [...elementsCopy[id].points, { x: x2, y: y2 }];
+        break;
+      case 'text':
+        // write a function that after click on canvas displays input and saves text
         break;
       default:
         throw new Error(`Type not recognized: ${type}`);
@@ -156,6 +162,12 @@ const Board = () => {
   };
 
   const isToolMenuOpen = tool === 'pointer' || tool === 'eraser' || tool === 'image' ? false : true;
+
+  // const handleMouseClick = (event: IEvent) => {
+  //   if (tool === 'text') {
+  //     addInput(event.clientX, event.clientY, canvasContext);
+  //   }
+  // };
 
   return (
     <div className='w-full h-screen'>

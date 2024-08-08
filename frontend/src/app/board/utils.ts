@@ -3,7 +3,8 @@ import rough from 'roughjs';
 import { RoughCanvas } from 'roughjs/bin/canvas';
 import { Drawable } from 'roughjs/bin/core';
 import { Point } from 'roughjs/bin/geometry';
-import { IOptions } from './page';
+import { IOptions } from './[id]/page';
+import { arrowHeadLength, arrowStrokeColor, bowingOptionValue } from '@config';
 
 export interface IElement {
   x1: number;
@@ -53,7 +54,7 @@ const convertedColor = (option: string, opacity: number) => {
 };
 
 const formatOptions = (options: IOptions): INewOptions => ({
-  bowing: 2,
+  bowing: bowingOptionValue,
   fillStyle: 'solid',
   roughness: parseFloat(options.roughness),
   seed: options.seed,
@@ -83,6 +84,8 @@ export const createElement = (id: number, x1: number, y1: number, x2: number, y2
     case 'pencil':
       return { id, type, points: [{ x: x1, y: y1 }] };
     case 'arrow':
+      return { id, type, x1, y1, x2, y2 };
+    case 'text':
       return { id, type, x1, y1, x2, y2 };
     default:
       throw new Error(`Type not recognized: ${type}`);
@@ -117,7 +120,6 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       context.fill(new Path2D(stroke));
       break;
     case 'arrow':
-      const headLength = 10;
       const startX = element.x1;
       const startY = element.y1;
       const endX = element.x2;
@@ -125,14 +127,17 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       const angle = Math.atan2(endY - startY, endX - startX);
 
       roughCanvas.line(startX, startY, endX, endY);
-      roughCanvas.line(endX, endY, endX - headLength * Math.cos(angle - Math.PI / 6), endY - headLength * Math.sin(angle - Math.PI / 6), {
-        stroke: 'black',
+      roughCanvas.line(endX, endY, endX - arrowHeadLength * Math.cos(angle - Math.PI / 6), endY - arrowHeadLength * Math.sin(angle - Math.PI / 6), {
+        stroke: arrowStrokeColor,
         strokeWidth: 2,
       });
-      roughCanvas.line(endX, endY, endX - headLength * Math.cos(angle + Math.PI / 6), endY - headLength * Math.sin(angle + Math.PI / 6), {
-        stroke: 'black',
+      roughCanvas.line(endX, endY, endX - arrowHeadLength * Math.cos(angle + Math.PI / 6), endY - arrowHeadLength * Math.sin(angle + Math.PI / 6), {
+        stroke: arrowStrokeColor,
         strokeWidth: 2,
       });
+      break;
+    case 'text':
+      // context.fillText('Text', element.x1, element.y1);
       break;
     default:
       throw new Error(`Type not recognized: ${element.type}`);
@@ -163,3 +168,23 @@ export const adjustElementCoordinates = (element: IElement) => {
     }
   }
 };
+
+// export const addInput = (x: number, y: number, ctx) => {
+//   const input = document.createElement('input') as HTMLInputElement;
+//   input.type = 'text';
+//   input.style.position = 'absolute';
+//   input.style.left = `${x}px`;
+//   input.style.top = `${y}px`;
+//   input.onkeydown = (e) => handleEnter(e, ctx, x, y);
+//   document.body.appendChild(input);
+//   input.focus();
+// };
+
+// const handleEnter = (e, ctx, x, y) => {
+//   var keyCode = e.keyCode;
+//   if (keyCode === 13) {
+//     ctx.font = '20px Arial';
+//     ctx.fillText(e.target.value, x, y);
+//     document.body.removeChild(e.target);
+//   }
+// };

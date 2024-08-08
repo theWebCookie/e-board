@@ -1,4 +1,4 @@
-import { IOptions } from '@/app/board/page';
+import { IOptions } from '@/app/board/[id]/page';
 import MenuInput from './MenuInput';
 import { ChangeEvent, useState } from 'react';
 

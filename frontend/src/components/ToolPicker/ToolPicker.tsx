@@ -1,6 +1,6 @@
 'use client';
 import Tool from './Tool';
-import { ITool } from '@/app/board/page';
+import { ITool } from '@/app/board/[id]/page';
 interface ToolPickerProps {
   tools: ITool[];
   activeTool: string | null;

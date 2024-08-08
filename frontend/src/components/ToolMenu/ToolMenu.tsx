@@ -1,4 +1,4 @@
-import { IOptions } from '@/app/board/page';
+import { IOptions } from '@/app/board/[id]/page';
 import ToolMenuItem from './ToolMenuItem';
 import { useState } from 'react';
 
