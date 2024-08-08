@@ -2,6 +2,7 @@ import LoginForm from '../LoginForm';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Dialog } from '@/components/ui/dialog';
 import { Toaster } from '@/components/ui/toaster';
+import { schemaErrorDictionary } from '@config';
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -20,6 +21,12 @@ const fillForm = async (email: string, password: string) => {
 
   const loginButton = screen.getByText('Zaloguj');
   loginButton.click();
+};
+
+const mockUserData = {
+  name: 'example_test',
+  email: 'example_test@com.pl',
+  password: '123456',
 };
 
 describe('LoginForm', () => {
@@ -65,9 +72,9 @@ describe('LoginForm', () => {
       </>
     );
 
-    await fillForm('invalid-email', '12345');
-    expect(await screen.findByText('Niepoprawny adres email.')).toBeInTheDocument();
-    expect(await screen.findByText('Hasło musi mieć co najmniej 6 znaków.')).toBeInTheDocument();
+    await fillForm('invalid-email', mockUserData.password.slice(0, 5));
+    expect(await screen.findByText(schemaErrorDictionary['email-is-invalid'])).toBeInTheDocument();
+    expect(await screen.findByText(schemaErrorDictionary['password-is-weak'])).toBeInTheDocument();
   });
 
   it('should show error toast after failed login', async () => {
@@ -80,13 +87,19 @@ describe('LoginForm', () => {
       </>
     );
 
-    await fillForm('example@com.pl', '1234567');
-    expect(await screen.findByText('Bład logowania ☹️')).toBeInTheDocument();
-    expect(await screen.findByText('Niepoprawne dane logowania')).toBeInTheDocument();
+    global.fetch = jest.fn(
+      () =>
+        Promise.resolve({
+          json: () => Promise.resolve({ error: 'Niepoprawne hasło.' }),
+          ok: false,
+        }) as Promise<Response>
+    );
+
+    await fillForm(mockUserData.email, mockUserData.password + 'invalid');
+    expect(await screen.findByText('Niepoprawne hasło.')).toBeInTheDocument();
   });
 
   it('should show toast after successful login', async () => {
-    const mockEmail = 'example@com.pl';
     render(
       <>
         <Dialog>
@@ -96,8 +109,16 @@ describe('LoginForm', () => {
       </>
     );
 
-    await fillForm(mockEmail, '123456');
+    global.fetch = jest.fn(
+      () =>
+        Promise.resolve({
+          json: () => Promise.resolve({ name: mockUserData.name }),
+          ok: true,
+        }) as Promise<Response>
+    );
+
+    await fillForm(mockUserData.email, mockUserData.password);
     expect(await screen.findByText('Zalogowano pomyślnie 😊')).toBeInTheDocument();
-    expect(await screen.findByText(`Witaj ${mockEmail}`)).toBeInTheDocument();
+    expect(await screen.findByText(`Witaj ${mockUserData.name}!`)).toBeInTheDocument();
   });
 });

@@ -10,6 +10,7 @@ import { useToast } from '../ui/use-toast';
 import { useRouter } from 'next/navigation';
 import { Separator } from '@radix-ui/react-separator';
 import { DialogTrigger } from '../ui/dialog';
+import { loginToastDictionary, toastTimeout } from '@config';
 
 const LoginForm = () => {
   const { toast } = useToast();
@@ -22,28 +23,41 @@ const LoginForm = () => {
     },
   });
 
-  const mockData = {
-    email: 'example@com.pl',
-    password: '123456',
-  };
-
   const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {
-    if (values.email !== mockData.email || values.password !== mockData.password) {
-      toast({
-        title: 'Bład logowania ☹️',
-        description: `Niepoprawne dane logowania`,
-        duration: 3000,
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ values, type: 'login' }),
       });
-      return;
-    } else {
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast({
+          title: loginToastDictionary['fail-login-toast-title'],
+          description: `${errorData.error}`,
+          duration: toastTimeout,
+        });
+        return;
+      }
+
+      const data = await response.json();
       toast({
-        title: 'Zalogowano pomyślnie 😊',
-        description: `Witaj ${values.email}`,
-        duration: 800,
+        title: loginToastDictionary['success-login-toast-title'],
+        description: `Witaj ${data.name}!`,
+        duration: toastTimeout,
       });
-      router.push('/home');
+
+      setTimeout(() => {
+        router.push('/home');
+      }, 3000);
+    } catch (error) {
+      console.error(error);
     }
   };
+
   return (
     <>
       <Form {...form}>

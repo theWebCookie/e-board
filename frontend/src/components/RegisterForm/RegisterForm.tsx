@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { useForm } from 'react-hook-form';
 import { useToast } from '../ui/use-toast';
 import { useRouter } from 'next/navigation';
+import { registerToastDictionary, toastTimeout } from '@config';
 
 const RegisterForm = () => {
   const { toast } = useToast();
@@ -21,30 +22,38 @@ const RegisterForm = () => {
     },
   });
 
-  const mockData = {
-    name: 'example',
-    email: 'example@com.pl',
-    password: '123456',
-  };
-
   const onSubmit = async (values: z.infer<typeof registerFormSchema>) => {
-    if (values.name !== mockData.name || values.email !== mockData.email || values.password !== mockData.password) {
-      toast({
-        title: 'Bład podczas rejestracji ☹️',
-        description: `Niepoprawna dane do rejestracji`,
-        duration: 3000,
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ values, type: 'register' }),
       });
-      return;
-    } else {
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast({
+          title: registerToastDictionary['fail-register-toast-title'],
+          description: `${errorData.error}`,
+          duration: toastTimeout,
+        });
+        return;
+      }
+
+      const data = await response.json();
       toast({
-        title: 'Zarejestrowano pomyślnie 😊',
-        description: `Witaj ${values.email}`,
-        duration: 1000,
+        title: registerToastDictionary['success-register-toast-title'],
+        description: `Witaj ${data.name}!`,
+        duration: toastTimeout,
       });
 
       setTimeout(() => {
         router.push('/home');
-      }, 1000);
+      }, 100);
+    } catch (error) {
+      console.error(error);
     }
   };
   return (
