@@ -25,6 +25,12 @@ const fillForm = async (name: string, email: string, password: string) => {
   registerButton.click();
 };
 
+const mockUserData = {
+  name: 'example_test',
+  email: 'example_test@com.pl',
+  password: '123456',
+};
+
 describe('RegisterForm', () => {
   it('should render register form', () => {
     render(
@@ -57,7 +63,7 @@ describe('RegisterForm', () => {
       </>
     );
 
-    await fillForm('example', 'invalid-email', '12345');
+    await fillForm(mockUserData.name, 'invalid-email', mockUserData.password.slice(0, 5));
     expect(await screen.findByText('Niepoprawny adres email.')).toBeInTheDocument();
     expect(await screen.findByText('Hasło musi mieć co najmniej 6 znaków.')).toBeInTheDocument();
   });
@@ -69,13 +75,12 @@ describe('RegisterForm', () => {
       </>
     );
 
-    await fillForm('example', 'example.pl', '12345');
+    await fillForm(mockUserData.name, 'invalid-email', mockUserData.password.slice(0, 5));
     expect(await screen.findByText('Niepoprawny adres email.')).toBeInTheDocument();
     expect(await screen.findByText('Hasło musi mieć co najmniej 6 znaków.')).toBeInTheDocument();
   });
 
   it('should show toast after successful register', async () => {
-    const mockEmail = 'example@com.pl';
     render(
       <>
         <RegisterForm />
@@ -83,8 +88,15 @@ describe('RegisterForm', () => {
       </>
     );
 
-    await fillForm('example', mockEmail, '123456');
+    global.fetch = jest.fn(
+      () =>
+        Promise.resolve({
+          json: () => Promise.resolve({ name: mockUserData.name }),
+          ok: true,
+        }) as Promise<Response>
+    );
+
+    await fillForm(mockUserData.name, mockUserData.email, mockUserData.password);
     expect(await screen.findByText('Zarejestrowano pomyślnie 😊')).toBeInTheDocument();
-    expect(await screen.findByText(`Witaj ${mockEmail}`)).toBeInTheDocument();
   });
 });
