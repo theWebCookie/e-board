@@ -1,4 +1,5 @@
 import { errorDictionary, passwordLength } from '@config';
+import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 
 const validateData = (email: string, password: string) => {
@@ -45,6 +46,8 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await res.json();
+    cookies().set('sessionId', data.sessionId);
+    cookies().set('userId', data.id);
     return Response.json(data);
   }
 
@@ -70,5 +73,7 @@ export async function POST(request: NextRequest) {
   }
 
   const data = await res.json();
+  cookies().set('sessionId', data.sessionId);
+  cookies().set('userId', data.id);
   return Response.json(data);
 }

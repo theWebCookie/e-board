@@ -50,9 +50,7 @@ const LoginForm = () => {
         duration: toastTimeout,
       });
 
-      setTimeout(() => {
-        router.push('/home');
-      }, 3000);
+      router.push('/home');
     } catch (error) {
       console.error(error);
     }
