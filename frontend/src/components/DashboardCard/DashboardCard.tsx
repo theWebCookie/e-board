@@ -9,7 +9,7 @@ import DashboardCardDescription from './DashboardCardDescription';
 
 const DashboardCard: React.FC<IBoardWithUsers> = ({ name, id, users }) => {
   return (
-    <Card className='max-w-xs h-48'>
+    <Card className='max-w-xs w-80'>
       <CardHeader>
         <CardTitle>{name}</CardTitle>
         <DashboardCardDescription numOfUsers={users.length} />
