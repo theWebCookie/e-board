@@ -14,12 +14,11 @@ const InteractiveSections = () => {
         return;
       }
       const data = await res.json();
-      setBoards(data);
+      setBoards(data.reverse());
     };
     fetchBoards();
   }, []);
 
-  console.log(boards);
   return (
     <>
       <section className='flex gap-5 items-center flex-wrap my-3'>
