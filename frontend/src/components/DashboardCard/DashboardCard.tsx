@@ -1,15 +1,16 @@
-import { ICardWithUsers } from '@/app/home/page';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { IBoardWithUsers } from '@/app/home/page';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import Link from 'next/link';
-import Image from 'next/image';
+import { User } from 'lucide-react';
+import { Tooltip, TooltipProvider } from '../ui/tooltip';
+import { TooltipContent, TooltipTrigger } from '@radix-ui/react-tooltip';
 
-const DashboardCard: React.FC<ICardWithUsers> = ({ title, id, description, users }) => {
+const DashboardCard: React.FC<IBoardWithUsers> = ({ name, id, users }) => {
   return (
     <Card className='max-w-xs h-48'>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle>{name}</CardTitle>
       </CardHeader>
       <CardContent
         className='flex justify-between
@@ -18,7 +19,14 @@ const DashboardCard: React.FC<ICardWithUsers> = ({ title, id, description, users
         <div className='flex gap-1'>
           {users.map((user, idx) => (
             <span key={idx} className='flex shrink-0 w-8 h-8 rounded-full overflow-hidden'>
-              <Image src='/avatar.png' alt={user.name} title={user.name} width={32} height={32} className='aspect-squre h-full w-full' />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <User width={32} height={32} className='aspect-squre h-full w-full' />
+                  </TooltipTrigger>
+                  <TooltipContent>{user.name}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </span>
           ))}
         </div>

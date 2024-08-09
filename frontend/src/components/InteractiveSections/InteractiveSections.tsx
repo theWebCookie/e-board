@@ -1,36 +1,31 @@
-import { ICardWithUsers } from '@/app/home/page';
+'use client';
+import { IBoardWithUsers } from '@/app/home/page';
 import CreateBoard from '../CreateBoard/CreateBoard';
 import DashboardCard from '../DashboardCard/DashboardCard';
-
-// mock boards that user was a part of
-const cards: ICardWithUsers[] = [
-  {
-    title: 'Pusta tablica',
-    id: 1,
-    description: 'empty boardempty boardempty boardempty boardempty board',
-    users: [
-      { name: 'John Doe', image: '/avatar.png' },
-      { name: 'Jane Doe', image: '/avatar.png' },
-    ],
-  },
-  {
-    title: 'Pusta tablica2',
-    id: 2,
-    description: 'empty board 2',
-    users: [
-      { name: 'John Doe', image: '/avatar.png' },
-      { name: 'Jane Doe', image: '/avatar.png' },
-    ],
-  },
-];
+import { useEffect, useState } from 'react';
 
 const InteractiveSections = () => {
+  const [boards, setBoards] = useState<IBoardWithUsers[]>([]);
+  useEffect(() => {
+    const fetchBoards = async () => {
+      const res = await fetch('/api/boards');
+      if (!res.ok) {
+        setBoards([]);
+        return;
+      }
+      const data = await res.json();
+      setBoards(data);
+    };
+    fetchBoards();
+  }, []);
+
+  console.log(boards);
   return (
     <>
       <section className='flex gap-5 items-center flex-wrap my-3'>
-        {cards.map((card) => (
-          <DashboardCard key={card.title} title={card.title} id={card.id} description={card.description} users={card.users} />
-        ))}
+        {boards
+          ? boards.map((board: IBoardWithUsers) => <DashboardCard key={board.id} name={board.name} id={board.id} users={board.users} />)
+          : 'Brak tablic'}
       </section>
       <section className='w-full'>
         <CreateBoard />
