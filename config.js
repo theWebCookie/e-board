@@ -30,6 +30,7 @@ export const inviteFormDictionary = {
   'invite-code-is-required': 'Kod jest wymagany.',
   'invite-code-is-invalid': 'Niepoprawny kod.',
   'success-invite': 'Dołączono pomyślnie.',
+  'user-id-is-required': 'Id użytkownika jest wymagane.',
 };
 
 export const toastTimeout = 3000;
