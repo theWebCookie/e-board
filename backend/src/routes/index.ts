@@ -1,3 +1,4 @@
+import passport from 'passport';
 import { status, account, board } from '../controllers';
 import { Router } from 'express';
 
@@ -8,8 +9,12 @@ router.post('/register', account.register);
 router.post('/login', account.login);
 router.get('/users', account.users);
 
-router.get('/inviteCode', board.inviteCode);
-router.post('/handleInviteCode', board.handleInviteCode);
+router.post('/handleInviteCode', board.handleInviteByCode);
 router.post('/create', board.create);
+router.get('/userBoards', board.userBoards);
+
+router.get('/boards', board.boards);
+router.get('/boardsInvites', board.boardsInvites);
+router.get('/boardUsers', board.boardUsers);
 
 export { router };
