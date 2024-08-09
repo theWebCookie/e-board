@@ -118,7 +118,7 @@ export const boardUsers = async (req: Request, res: Response): Promise<void> => 
 };
 
 export const userBoards = async (req: Request, res: Response): Promise<void> => {
-  const { userId } = req.body;
+  const { userId } = req.params;
 
   const userBoards = await prisma.usersOnBoards.findMany({
     where: {

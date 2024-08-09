@@ -1,4 +1,3 @@
-import passport from 'passport';
 import { status, account, board } from '../controllers';
 import { Router } from 'express';
 
@@ -16,5 +15,6 @@ router.get('/userBoards', board.userBoards);
 router.get('/boards', board.boards);
 router.get('/boardsInvites', board.boardsInvites);
 router.get('/boardUsers', board.boardUsers);
+router.get('/userBoards/:userId', board.userBoards);
 
 export { router };
