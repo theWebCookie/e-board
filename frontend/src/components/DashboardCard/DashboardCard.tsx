@@ -1,16 +1,18 @@
 import { IBoardWithUsers } from '@/app/home/page';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { User } from 'lucide-react';
 import { Tooltip, TooltipProvider } from '../ui/tooltip';
 import { TooltipContent, TooltipTrigger } from '@radix-ui/react-tooltip';
+import DashboardCardDescription from './DashboardCardDescription';
 
 const DashboardCard: React.FC<IBoardWithUsers> = ({ name, id, users }) => {
   return (
     <Card className='max-w-xs h-48'>
       <CardHeader>
         <CardTitle>{name}</CardTitle>
+        <DashboardCardDescription numOfUsers={users.length} />
       </CardHeader>
       <CardContent
         className='flex justify-between
