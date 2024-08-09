@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const DashboardCard: React.FC<ICardWithUsers> = ({ title, url, description, users }) => {
+const DashboardCard: React.FC<ICardWithUsers> = ({ title, id, description, users }) => {
   return (
     <Card className='max-w-xs h-48'>
       <CardHeader>
@@ -23,8 +23,8 @@ const DashboardCard: React.FC<ICardWithUsers> = ({ title, url, description, user
           ))}
         </div>
         <div>
-          <Button className='px-2 py-1 flex items-center'>
-            <Link href={url}>Wejdź</Link>
+          <Button className='py-1 flex items-center'>
+            <Link href={`/board/${id}`}>Wejdź</Link>
           </Button>
         </div>
       </CardContent>
