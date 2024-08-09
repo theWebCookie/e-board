@@ -6,15 +6,13 @@ import React from 'react';
 
 export interface IUser {
   name: string;
-  image: string;
 }
-export interface ICard {
-  title: string;
+export interface IBoard {
+  name: string;
   id: number;
-  description: string;
 }
 
-export interface ICardWithUsers extends ICard {
+export interface IBoardWithUsers extends IBoard {
   users: IUser[];
 }
 
