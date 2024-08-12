@@ -6,7 +6,16 @@ import ToolPicker from '@/components/ToolPicker/ToolPicker';
 import rough from 'roughjs';
 import Chat from '@/components/Chat/Chat';
 import { useRouter } from 'next/navigation';
-import { adjustElementCoordinates, adjustmentRequired, createElement, drawElement, getMouseCoordinates, IElement, IEvent } from '../utils';
+import {
+  adjustElementCoordinates,
+  adjustmentRequired,
+  createElement,
+  drawElement,
+  getElementAtPosition,
+  getMouseCoordinates,
+  IElement,
+  IEvent,
+} from '../utils';
 import ToolMenu from '@/components/ToolMenu/ToolMenu';
 import { defaultOptions } from '@config';
 
@@ -49,10 +58,9 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(true);
-  const [selectedElement, setSelectedElement] = useState(null);
+  const [selectedElement, setSelectedElement] = useState<IElement | null>(null);
   const [action, setAction] = useState('none');
   const [dataURL, setDataURL] = useState('');
-  const [canvasContext, setCanvasContext] = useState(null);
 
   console.log(`Board id: ${params.id}`);
   const seed = Math.floor(Math.random() * 2 ** 31);
@@ -65,7 +73,6 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
   useEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
     const context = canvas.getContext('2d') as CanvasRenderingContext2D;
-    setCanvasContext(context);
 
     const roughCanvas = rough.canvas(canvas);
     const url = canvas.toDataURL();
@@ -76,7 +83,6 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     elements.forEach((element) => drawElement(roughCanvas, context, element));
     context.restore();
     setIsHidden(false);
-    // fetchData();
   }, [elements, action]);
 
   useLayoutEffect(() => {
@@ -97,9 +103,15 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
       const canvas = document.getElementById('canvas') as HTMLCanvasElement;
       const context = canvas.getContext('2d') as CanvasRenderingContext2D;
       context.drawImage(img, 0, 0);
+      console.log(canvas.toDataURL());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensions]);
+
+  useEffect(() => {
+    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+    console.log(canvas.toDataURL());
+  }, [elements]);
 
   const updateElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string) => {
     const elementsCopy: IElement[] = [...elements];
@@ -116,7 +128,6 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
         elementsCopy[id].points = [...elementsCopy[id].points, { x: x2, y: y2 }];
         break;
       case 'text':
-        // write a function that after click on canvas displays input and saves text
         break;
       default:
         throw new Error(`Type not recognized: ${type}`);
@@ -126,20 +137,40 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
 
   const handleMouseDown = (event: IEvent) => {
     const { clientX, clientY } = getMouseCoordinates(event);
-    const id = elements.length;
-    const element = createElement(id, clientX, clientY, clientX, clientY, tool, options);
-    setElements((prevState) => [...prevState, element]);
-    setSelectedElement(element);
+    if (tool === 'pointer') {
+      const element = getElementAtPosition(clientX, clientY, elements);
+      if (element) {
+        const offsetX = clientX - element.x1;
+        const offsetY = clientY - element.y1;
+        setSelectedElement({ ...element, offsetX, offsetY });
+        setAction('moving');
+      }
+    } else {
+      const id = elements.length;
+      const element = createElement(id, clientX, clientY, clientX, clientY, tool, options);
+      setElements((prevState) => [...prevState, element]);
+      setSelectedElement(element);
 
-    setAction(tool === 'text' ? 'writing' : 'drawing');
+      setAction(tool === 'text' ? 'writing' : 'drawing');
+    }
   };
 
   const handleMouseMove = (event: IEvent) => {
     const { clientX, clientY } = getMouseCoordinates(event);
+    if (tool === 'pointer') {
+      event.target.style.cursor = getElementAtPosition(clientX, clientY, elements) ? 'move' : 'default';
+    }
     if (action === 'drawing') {
       const index = elements.length - 1;
       const { x1, y1 } = elements[index];
       updateElement(index, x1, y1, clientX, clientY, tool);
+    } else if (action === 'moving') {
+      const { id, x1, x2, y1, y2, type, offsetX, offsetY } = selectedElement;
+      const width = x2 - x1;
+      const height = y2 - y1;
+      const newX1 = clientX - offsetX;
+      const newY1 = clientY - offsetY;
+      updateElement(id, newX1, newY1, newX1 + width, newY1 + height, type);
     }
   };
 

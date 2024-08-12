@@ -17,9 +17,14 @@ export interface IElement {
   id: number;
 }
 
-export interface IEvent {
+export interface IEvent extends MouseEvent {
   clientX: number;
   clientY: number;
+}
+
+export interface IPoint {
+  x: number;
+  y: number;
 }
 
 const generator = rough.generator();
@@ -167,6 +172,49 @@ export const adjustElementCoordinates = (element: IElement) => {
       return { x1: x2, y1: y2, x2: x1, y2: y1 };
     }
   }
+};
+
+const distance = (a: IPoint, b: IPoint) => Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+
+const isWithinElement = (x: number, y: number, element: IElement) => {
+  const { x1, y1, x2, y2, type } = element;
+  switch (type) {
+    case 'line':
+      const a = { x: x1, y: y1 };
+      const b = { x: x2, y: y2 };
+      const c = { x, y };
+      const offset = distance(a, b) - (distance(a, c) + distance(b, c));
+      return Math.abs(offset) < 1;
+    case 'rectangle':
+      const minX = Math.min(x1, x2);
+      const maxX = Math.max(x1, x2);
+      const minY = Math.min(y1, y2);
+      const maxY = Math.max(y1, y2);
+      return x >= minX && x <= maxX && y >= minY && y <= maxY;
+    case 'diamond':
+      const top = { x: x1 + (x2 - x1) / 2, y: y1 };
+      const right = { x: x2, y: y1 + (y2 - y1) / 2 };
+      const bottom = { x: x1 + (x2 - x1) / 2, y: y2 };
+      const left = { x: x1, y: y1 + (y2 - y1) / 2 };
+      return (
+        distance(top, { x, y }) + distance(right, { x, y }) + distance(bottom, { x, y }) + distance(left, { x, y }) <=
+        distance(top, right) + distance(right, bottom) + distance(bottom, left) + distance(left, top)
+      );
+    case 'circle':
+      const center = { x: x1, y: y1 };
+      const radius = distance(center, { x: x2, y: y2 });
+      return distance(center, { x, y }) <= radius;
+    case 'pencil':
+    case 'arrow':
+    case 'text':
+      return false;
+    default:
+      throw new Error(`Type not recognized: ${type}`);
+  }
+};
+
+export const getElementAtPosition = (x: number, y: number, elements: IElement[]) => {
+  return elements.find((element) => isWithinElement(x, y, element));
 };
 
 // export const addInput = (x: number, y: number, ctx) => {
