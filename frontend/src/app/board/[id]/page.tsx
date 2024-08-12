@@ -19,6 +19,7 @@ import {
 } from '../utils';
 import ToolMenu from '@/components/ToolMenu/ToolMenu';
 import { defaultOptions } from '@config';
+import useHistory from '../useHistory';
 
 export interface ITool {
   name: string;
@@ -54,7 +55,7 @@ interface IBoardProps {
 }
 
 const Board: React.FC<IBoardProps> = ({ params }) => {
-  const [elements, setElements] = useState<IElement[]>([]);
+  const [elements, setElements, undo, redo] = useHistory([]);
   const [tool, setTool] = useState<string>('pointer');
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -114,6 +115,18 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     console.log(canvas.toDataURL());
   }, [elements]);
 
+  useEffect(() => {
+    const undoRedoFunction = (event: React.KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'z') undo();
+      if ((event.metaKey || event.ctrlKey) && event.key === 'y') redo();
+    };
+
+    document.addEventListener('keydown', undoRedoFunction as unknown as EventListener);
+    return () => {
+      document.removeEventListener('keydown', undoRedoFunction as unknown as EventListener);
+    };
+  }, [undo, redo]);
+
   const updateElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string) => {
     const elementsCopy: IElement[] = [...elements];
 
@@ -133,7 +146,7 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
       default:
         throw new Error(`Type not recognized: ${type}`);
     }
-    setElements(elementsCopy);
+    setElements(elementsCopy, true);
   };
 
   const handleMouseDown: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
@@ -144,6 +157,7 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
         const offsetX = clientX - element.x1;
         const offsetY = clientY - element.y1;
         setSelectedElement({ ...element, offsetX, offsetY });
+        setElements((prevState) => prevState);
         if (element.position === 'inside') {
           setAction('moving');
         } else {
@@ -206,12 +220,6 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
   };
 
   const isToolMenuOpen = tool === 'pointer' || tool === 'eraser' || tool === 'image' ? false : true;
-
-  // const handleMouseClick = (event: IEvent) => {
-  //   if (tool === 'text') {
-  //     addInput(event.clientX, event.clientY, canvasContext);
-  //   }
-  // };
 
   return (
     <div className='w-full h-screen'>
