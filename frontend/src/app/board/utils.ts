@@ -42,22 +42,6 @@ interface INewOptions {
 
 const pencilStrokeOptions = { size: 3, thinning: 0.7, simulatePressure: true };
 
-const hexToRgb = (hex: string) => {
-  // group hex string into 3 groups (r, g, b) and parse them to integers
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : { r: 0, g: 0, b: 0 };
-};
-
-const convertedColor = (option: string, opacity: number) => {
-  return `rgba(${hexToRgb(option).r}, ${hexToRgb(option).g}, ${hexToRgb(option).b}, ${opacity})`;
-};
-
 const formatOptions = (options: IOptions): INewOptions => ({
   bowing: bowingOptionValue,
   fillStyle: 'solid',
@@ -68,6 +52,8 @@ const formatOptions = (options: IOptions): INewOptions => ({
   strokeWidth: parseInt(options.strokeWidth),
   strokeLineDash: options.strokeLineDash === '' ? [] : options.strokeLineDash.split(',').map((x) => parseInt(x)),
 });
+
+const distance = (a: IPoint, b: IPoint) => Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 
 export const createElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string, options: IOptions) => {
   const newOptions = formatOptions(options);
@@ -176,9 +162,11 @@ export const adjustElementCoordinates = (element: IElement) => {
   }
 };
 
-const distance = (a: IPoint, b: IPoint) => Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+export const getElementAtPosition = (x: number, y: number, elements: IElement[]) => {
+  return elements.map((element) => ({ ...element, position: positionWithElement(x, y, element) })).find((element) => element.position !== null);
+};
 
-const isWithinElement = (x: number, y: number, element: IElement) => {
+function positionWithElement(x: number, y: number, element: IElement) {
   const { x1, y1, x2, y2, type } = element;
   switch (type) {
     case 'line':
@@ -186,26 +174,36 @@ const isWithinElement = (x: number, y: number, element: IElement) => {
       const b = { x: x2, y: y2 };
       const c = { x, y };
       const offset = distance(a, b) - (distance(a, c) + distance(b, c));
-      return Math.abs(offset) < 1;
+      const start = nearPoint(x, y, x1, y1, 'start');
+      const end = nearPoint(x, y, x2, y2, 'end');
+      const insideLine = Math.abs(offset) < 1 ? 'inside' : null;
+      return start || end || insideLine;
     case 'rectangle':
-      const minX = Math.min(x1, x2);
-      const maxX = Math.max(x1, x2);
-      const minY = Math.min(y1, y2);
-      const maxY = Math.max(y1, y2);
-      return x >= minX && x <= maxX && y >= minY && y <= maxY;
+      const topLeft = nearPoint(x, y, x1, y1, 'tl');
+      const topRight = nearPoint(x, y, x2, y1, 'tr');
+      const bottomLeft = nearPoint(x, y, x1, y2, 'bl');
+      const bottomRight = nearPoint(x, y, x2, y2, 'br');
+      const insideRect = x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null;
+      return topLeft || topRight || bottomLeft || bottomRight || insideRect;
     case 'diamond':
       const top = { x: x1 + (x2 - x1) / 2, y: y1 };
       const right = { x: x2, y: y1 + (y2 - y1) / 2 };
       const bottom = { x: x1 + (x2 - x1) / 2, y: y2 };
       const left = { x: x1, y: y1 + (y2 - y1) / 2 };
-      return (
+      const topVertex = nearPoint(x, y, top.x, top.y, 'top');
+      const rightVertex = nearPoint(x, y, right.x, right.y, 'right');
+      const bottomVertex = nearPoint(x, y, bottom.x, bottom.y, 'bottom');
+      const leftVertex = nearPoint(x, y, left.x, left.y, 'left');
+      const insideDiamond =
         distance(top, { x, y }) + distance(right, { x, y }) + distance(bottom, { x, y }) + distance(left, { x, y }) <=
         distance(top, right) + distance(right, bottom) + distance(bottom, left) + distance(left, top)
-      );
+          ? 'inside'
+          : false;
+      return topVertex || rightVertex || bottomVertex || leftVertex || insideDiamond;
     case 'circle':
       const center = { x: x1, y: y1 };
       const radius = distance(center, { x: x2, y: y2 });
-      return distance(center, { x, y }) <= radius;
+      return distance(center, { x, y }) <= radius ? 'inside' : null;
     case 'pencil':
     case 'arrow':
     case 'text':
@@ -213,10 +211,76 @@ const isWithinElement = (x: number, y: number, element: IElement) => {
     default:
       throw new Error(`Type not recognized: ${type}`);
   }
+}
+
+function hexToRgb(hex: string) {
+  // group hex string into 3 groups (r, g, b) and parse them to integers
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : { r: 0, g: 0, b: 0 };
+}
+
+function convertedColor(option: string, opacity: number) {
+  return `rgba(${hexToRgb(option).r}, ${hexToRgb(option).g}, ${hexToRgb(option).b}, ${opacity})`;
+}
+
+function nearPoint(x: number, y: number, x1: number, y1: number, name: string) {
+  return Math.abs(x - x1) < 5 && Math.abs(y - y1) < 5 ? name : null;
+}
+
+export const cursorForPosition = (position: string | boolean | null) => {
+  switch (position) {
+    case 'tl':
+    case 'br':
+    case 'start':
+    case 'end':
+    case 'left':
+    case 'right':
+      return 'nwse-resize';
+    case 'tr':
+    case 'bl':
+    case 'top':
+    case 'bottom':
+      return 'nesw-resize';
+    default:
+      return 'move';
+  }
 };
 
-export const getElementAtPosition = (x: number, y: number, elements: IElement[]) => {
-  return elements.find((element) => isWithinElement(x, y, element));
+export const resizedCoordinates = (
+  clientX: number,
+  clientY: number,
+  position: string,
+  coordinates: { x1: number; y1: number; x2: number; y2: number }
+) => {
+  const { x1, y1, x2, y2 } = coordinates;
+  switch (position) {
+    case 'tl':
+    case 'start':
+      return { x1: clientX, y1: clientY, x2, y2 };
+    case 'tr':
+      return { x1, y1: clientY, x2: clientX, y2 };
+    case 'bl':
+      return { x1: clientX, y1, x2, y2: clientY };
+    case 'br':
+    case 'end':
+      return { x1, y1, x2: clientX, y2: clientY };
+    case 'top':
+      return { x1, y1: clientY, x2, y2 };
+    case 'bottom':
+      return { x1, y1, x2, y2: clientY };
+    case 'left':
+      return { x1: clientX, y1, x2, y2 };
+    case 'right':
+      return { x1, y1, x2: clientX, y2 };
+    default:
+      return { x1, y1, x2, y2 };
+  }
 };
 
 // export const addInput = (x: number, y: number, ctx) => {

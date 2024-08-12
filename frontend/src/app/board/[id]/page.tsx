@@ -10,10 +10,12 @@ import {
   adjustElementCoordinates,
   adjustmentRequired,
   createElement,
+  cursorForPosition,
   drawElement,
   getElementAtPosition,
   getMouseCoordinates,
   IElement,
+  resizedCoordinates,
 } from '../utils';
 import ToolMenu from '@/components/ToolMenu/ToolMenu';
 import { defaultOptions } from '@config';
@@ -142,7 +144,11 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
         const offsetX = clientX - element.x1;
         const offsetY = clientY - element.y1;
         setSelectedElement({ ...element, offsetX, offsetY });
-        setAction('moving');
+        if (element.position === 'inside') {
+          setAction('moving');
+        } else {
+          setAction('resize');
+        }
       }
     } else {
       const id = elements.length;
@@ -158,7 +164,8 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     const { clientX, clientY } = getMouseCoordinates(event);
     if (tool === 'pointer') {
       const target = event.target as HTMLCanvasElement;
-      target.style.cursor = getElementAtPosition(clientX, clientY, elements) ? 'move' : 'default';
+      const element = getElementAtPosition(clientX, clientY, elements);
+      target.style.cursor = element ? cursorForPosition(element.position) : 'default';
     }
     if (action === 'drawing') {
       const index = elements.length - 1;
@@ -172,6 +179,11 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
       const newX1 = clientX - offsetX;
       const newY1 = clientY - offsetY;
       updateElement(id, newX1, newY1, newX1 + width, newY1 + height, type);
+    } else if (action === 'resize') {
+      if (!selectedElement) return;
+      const { id, type, position, ...coordinates } = selectedElement;
+      const { x1, y1, x2, y2 } = resizedCoordinates(clientX, clientY, position, coordinates);
+      updateElement(id, x1, y1, x2, y2, type);
     }
   };
 
@@ -179,7 +191,7 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     if (selectedElement) {
       const index = selectedElement.id;
       const { id, type } = elements[index];
-      if (action === 'drawing' && adjustmentRequired(type)) {
+      if ((action === 'drawing' && adjustmentRequired(type)) || action === 'resize') {
         const { x1, y1, x2, y2 } = adjustElementCoordinates(elements[index]);
         updateElement(id, x1, y1, x2, y2, type);
       }
