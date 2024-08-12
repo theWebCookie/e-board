@@ -131,14 +131,16 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       const endY = element.y2;
       const angle = Math.atan2(endY - startY, endX - startX);
 
-      roughCanvas.line(startX, startY, endX, endY);
+      roughCanvas.line(startX, startY, endX, endY, { stroke: arrowStrokeColor, strokeWidth: 2, seed: 6 });
       roughCanvas.line(endX, endY, endX - arrowHeadLength * Math.cos(angle - Math.PI / 6), endY - arrowHeadLength * Math.sin(angle - Math.PI / 6), {
         stroke: arrowStrokeColor,
         strokeWidth: 2,
+        seed: 6,
       });
       roughCanvas.line(endX, endY, endX - arrowHeadLength * Math.cos(angle + Math.PI / 6), endY - arrowHeadLength * Math.sin(angle + Math.PI / 6), {
         stroke: arrowStrokeColor,
         strokeWidth: 2,
+        seed: 6,
       });
       break;
     case 'text':
