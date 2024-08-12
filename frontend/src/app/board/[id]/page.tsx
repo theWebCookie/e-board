@@ -14,7 +14,6 @@ import {
   getElementAtPosition,
   getMouseCoordinates,
   IElement,
-  IEvent,
 } from '../utils';
 import ToolMenu from '@/components/ToolMenu/ToolMenu';
 import { defaultOptions } from '@config';
@@ -135,7 +134,7 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     setElements(elementsCopy);
   };
 
-  const handleMouseDown = (event: IEvent) => {
+  const handleMouseDown: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
     const { clientX, clientY } = getMouseCoordinates(event);
     if (tool === 'pointer') {
       const element = getElementAtPosition(clientX, clientY, elements);
@@ -155,16 +154,18 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     }
   };
 
-  const handleMouseMove = (event: IEvent) => {
+  const handleMouseMove: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
     const { clientX, clientY } = getMouseCoordinates(event);
     if (tool === 'pointer') {
-      event.target.style.cursor = getElementAtPosition(clientX, clientY, elements) ? 'move' : 'default';
+      const target = event.target as HTMLCanvasElement;
+      target.style.cursor = getElementAtPosition(clientX, clientY, elements) ? 'move' : 'default';
     }
     if (action === 'drawing') {
       const index = elements.length - 1;
       const { x1, y1 } = elements[index];
       updateElement(index, x1, y1, clientX, clientY, tool);
     } else if (action === 'moving') {
+      if (!selectedElement) return;
       const { id, x1, x2, y1, y2, type, offsetX, offsetY } = selectedElement;
       const width = x2 - x1;
       const height = y2 - y1;
@@ -174,7 +175,7 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp: React.MouseEventHandler<HTMLCanvasElement> = () => {
     if (selectedElement) {
       const index = selectedElement.id;
       const { id, type } = elements[index];
