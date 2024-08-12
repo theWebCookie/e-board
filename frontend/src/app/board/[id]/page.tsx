@@ -82,7 +82,7 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.save();
-    elements.forEach((element) => drawElement(roughCanvas, context, element));
+    elements.forEach((element: IElement) => drawElement(roughCanvas, context, element));
     context.restore();
     setIsHidden(false);
   }, [elements, action]);
@@ -154,10 +154,17 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     if (tool === 'pointer') {
       const element = getElementAtPosition(clientX, clientY, elements);
       if (element) {
-        const offsetX = clientX - element.x1;
-        const offsetY = clientY - element.y1;
-        setSelectedElement({ ...element, offsetX, offsetY });
+        if (element.type === 'pencil') {
+          const xOffsetX = element.points.map((point) => clientX - point.x);
+          const yOffsetY = element.points.map((point) => clientY - point.y);
+          setSelectedElement({ ...element, xOffsetX, yOffsetY });
+        } else {
+          const offsetX = clientX - element.x1;
+          const offsetY = clientY - element.y1;
+          setSelectedElement({ ...element, offsetX, offsetY });
+        }
         setElements((prevState) => prevState);
+
         if (element.position === 'inside') {
           setAction('moving');
         } else {
@@ -187,12 +194,26 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
       updateElement(index, x1, y1, clientX, clientY, tool);
     } else if (action === 'moving') {
       if (!selectedElement) return;
-      const { id, x1, x2, y1, y2, type, offsetX, offsetY } = selectedElement;
-      const width = x2 - x1;
-      const height = y2 - y1;
-      const newX1 = clientX - offsetX;
-      const newY1 = clientY - offsetY;
-      updateElement(id, newX1, newY1, newX1 + width, newY1 + height, type);
+      if (selectedElement.type === 'pencil') {
+        const newPoints = selectedElement.points.map((_, index) => ({
+          x: clientX - selectedElement.xOffsetX[index],
+          y: clientY - selectedElement.yOffsetY[index],
+        }));
+        const elementsCopy = [...elements];
+        elementsCopy[selectedElement.id] = {
+          ...elementsCopy[selectedElement.id],
+          points: newPoints,
+        };
+        setElements(elementsCopy, true);
+      } else {
+        const { id, x1, x2, y1, y2, type, offsetX, offsetY } = selectedElement;
+        const width = x2 - x1;
+        const height = y2 - y1;
+        if (!offsetX || !offsetY) return;
+        const newX1 = clientX - offsetX;
+        const newY1 = clientY - offsetY;
+        updateElement(id, newX1, newY1, newX1 + width, newY1 + height, type);
+      }
     } else if (action === 'resize') {
       if (!selectedElement) return;
       const { id, type, position, ...coordinates } = selectedElement;
@@ -205,7 +226,7 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     if (selectedElement) {
       const index = selectedElement.id;
       const { id, type } = elements[index];
-      if ((action === 'drawing' && adjustmentRequired(type)) || action === 'resize') {
+      if ((action === 'drawing' || action === 'resize') && adjustmentRequired(type)) {
         const { x1, y1, x2, y2 } = adjustElementCoordinates(elements[index]);
         updateElement(id, x1, y1, x2, y2, type);
       }

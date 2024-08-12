@@ -15,6 +15,11 @@ export interface IElement {
   type: string;
   points: Point[];
   id: number;
+  position?: string;
+  offsetX?: number;
+  offsetY?: number;
+  xOffsetX: number[];
+  yOffsetY: number[];
 }
 
 export interface IEvent extends MouseEvent {
@@ -40,7 +45,21 @@ interface INewOptions {
   strokeLineDash: number[];
 }
 
-const pencilStrokeOptions = { size: 3, thinning: 0.7, simulatePressure: true };
+const pencilStrokeOptions = {
+  size: 10,
+  smoothing: 0.5,
+  thinning: 0.5,
+  streamline: 0.5,
+  easing: (t: any) => t,
+  start: {
+    taper: 0,
+    cap: true,
+  },
+  end: {
+    taper: 0,
+    cap: true,
+  },
+};
 
 const formatOptions = (options: IOptions): INewOptions => ({
   bowing: bowingOptionValue,
@@ -166,18 +185,22 @@ export const getElementAtPosition = (x: number, y: number, elements: IElement[])
   return elements.map((element) => ({ ...element, position: positionWithElement(x, y, element) })).find((element) => element.position !== null);
 };
 
+const onLine = (x1: number, y1: number, x2: number, y2: number, x: number, y: number, maxDistance = 1) => {
+  const a = { x: x1, y: y1 };
+  const b = { x: x2, y: y2 };
+  const c = { x, y };
+  const offset = distance(a, b) - (distance(a, c) + distance(b, c));
+  return Math.abs(offset) < maxDistance ? 'inside' : null;
+};
+
 function positionWithElement(x: number, y: number, element: IElement) {
   const { x1, y1, x2, y2, type } = element;
   switch (type) {
     case 'line':
-      const a = { x: x1, y: y1 };
-      const b = { x: x2, y: y2 };
-      const c = { x, y };
-      const offset = distance(a, b) - (distance(a, c) + distance(b, c));
+      const on = onLine(x1, y1, x2, y2, x, y);
       const start = nearPoint(x, y, x1, y1, 'start');
       const end = nearPoint(x, y, x2, y2, 'end');
-      const insideLine = Math.abs(offset) < 1 ? 'inside' : null;
-      return start || end || insideLine;
+      return start || end || on;
     case 'rectangle':
       const topLeft = nearPoint(x, y, x1, y1, 'tl');
       const topRight = nearPoint(x, y, x2, y1, 'tr');
@@ -205,6 +228,12 @@ function positionWithElement(x: number, y: number, element: IElement) {
       const radius = distance(center, { x: x2, y: y2 });
       return distance(center, { x, y }) <= radius ? 'inside' : null;
     case 'pencil':
+      const betweenAnyPoint = element.points.some((point, index) => {
+        const nextPoint = element.points[index + 1] as unknown as IPoint;
+        if (!nextPoint) return false;
+        return onLine(point.x, point.y, nextPoint.x, nextPoint.y, x, y, 5) != null;
+      });
+      return betweenAnyPoint ? 'inside' : null;
     case 'arrow':
     case 'text':
       return false;
@@ -255,7 +284,7 @@ export const cursorForPosition = (position: string | boolean | null) => {
 export const resizedCoordinates = (
   clientX: number,
   clientY: number,
-  position: string,
+  position: string | undefined,
   coordinates: { x1: number; y1: number; x2: number; y2: number }
 ) => {
   const { x1, y1, x2, y2 } = coordinates;
