@@ -9,6 +9,8 @@ import {
   getElementAtPosition,
   getMouseCoordinates,
   IElement,
+  IPencilElement,
+  ITextElement,
   resizedCoordinates,
   updateElement,
 } from '@/app/board/utils';
@@ -22,7 +24,7 @@ interface ICanvasProps {
 }
 
 const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
-  const [elements, setElements, undo, redo] = useHistory([]);
+  const { state: elements, setState: setElements, undo, redo } = useHistory([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [selectedElement, setSelectedElement] = useState<IElement | null>(null);
   const [action, setAction] = useState('none');
@@ -81,7 +83,7 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
       if (!textArea) return;
       setTimeout(() => {
         textArea.focus();
-        textArea.value = selectedElement?.text ?? '';
+        textArea.value = (selectedElement as ITextElement)?.text ?? '';
       }, 0);
     }
   }, [action, selectedElement]);
@@ -105,13 +107,15 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
       const element = getElementAtPosition(clientX, clientY, elements);
       if (element) {
         if (element.type === 'pencil') {
-          const xOffsetX = element.points.map((point) => clientX - point.x);
-          const yOffsetY = element.points.map((point) => clientY - point.y);
-          setSelectedElement({ ...element, xOffsetX, yOffsetY });
+          const pencilElement = element as IPencilElement;
+          const xOffsetX = pencilElement.points.map((point) => clientX - point.x);
+          const yOffsetY = pencilElement.points.map((point) => clientY - point.y);
+          setSelectedElement({ ...pencilElement, xOffsetX, yOffsetY });
         } else {
-          const offsetX = clientX - element.x1;
-          const offsetY = clientY - element.y1;
-          setSelectedElement({ ...element, offsetX, offsetY });
+          const otherElement = element as IElement;
+          const offsetX = clientX - otherElement.x1;
+          const offsetY = clientY - otherElement.y1;
+          setSelectedElement({ ...otherElement, offsetX, offsetY });
         }
         setElements((prevState: any) => prevState);
 
@@ -124,7 +128,7 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
     } else {
       const id = elements.length;
       const element = createElement(id, clientX, clientY, clientX, clientY, tool, options);
-      setElements((prevState: any) => [...prevState, element]);
+      setElements((prevState) => [...prevState, element]);
       setSelectedElement(element);
 
       setAction(tool === 'text' ? 'writing' : 'drawing');
@@ -145,13 +149,14 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
     } else if (action === 'moving') {
       if (!selectedElement) return;
       if (selectedElement.type === 'pencil') {
-        const newPoints = selectedElement.points.map((_, index) => ({
-          x: clientX - selectedElement.xOffsetX[index],
-          y: clientY - selectedElement.yOffsetY[index],
+        const pencilElement = selectedElement as IPencilElement;
+        const newPoints = pencilElement.points.map((_, index) => ({
+          x: clientX - pencilElement.xOffsetX[index],
+          y: clientY - pencilElement.yOffsetY[index],
         }));
         const elementsCopy = [...elements];
-        elementsCopy[selectedElement.id] = {
-          ...elementsCopy[selectedElement.id],
+        elementsCopy[pencilElement.id] = {
+          ...elementsCopy[pencilElement.id],
           points: newPoints,
         };
         setElements(elementsCopy, true);
@@ -162,7 +167,7 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
         if (!offsetX || !offsetY) return;
         const newX1 = clientX - offsetX;
         const newY1 = clientY - offsetY;
-        const textOptions = type === 'text' ? { text: selectedElement.text } : {};
+        const textOptions = type === 'text' ? { text: (selectedElement as ITextElement).text } : {};
         updateElement(elements, id, newX1, newY1, newX1 + width, newY1 + height, type, textOptions, options, setElements);
       }
     } else if (action === 'resize') {
@@ -178,8 +183,8 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
     if (selectedElement) {
       if (
         selectedElement.type === 'text' &&
-        clientX - selectedElement.offsetX === selectedElement.x1 &&
-        clientY - selectedElement.offsetY === selectedElement.y1
+        clientX - (selectedElement as ITextElement).offsetX === selectedElement.x1 &&
+        clientY - (selectedElement as ITextElement).offsetY === selectedElement.y1
       ) {
         setAction('writing');
         return;

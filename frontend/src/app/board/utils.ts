@@ -6,27 +6,60 @@ import { Point } from 'roughjs/bin/geometry';
 import { IOptions } from './[id]/page';
 import { arrowHeadLength, arrowStrokeColor, bowingOptionValue } from '@config';
 
-export interface IElement {
+export interface IBaseElement {
+  id: number;
+  type: string;
   x1: number;
   y1: number;
   x2: number;
   y2: number;
-  roughElement: Drawable;
-  type: string;
-  points: Point[];
-  id: number;
   position?: string | null;
   offsetX?: number;
   offsetY?: number;
+}
+
+export interface ILineElement extends IBaseElement {
+  type: 'line';
+  roughElement: Drawable;
+}
+
+export interface IRectangleElement extends IBaseElement {
+  type: 'rectangle';
+  roughElement: Drawable;
+}
+
+export interface ICircleElement extends IBaseElement {
+  type: 'circle';
+  roughElement: Drawable;
+}
+
+export interface IDiamondElement extends IBaseElement {
+  type: 'diamond';
+  roughElement: Drawable;
+}
+
+export interface IPencilElement extends IBaseElement {
+  type: 'pencil';
+  points: Point[];
   xOffsetX: number[];
   yOffsetY: number[];
-  text?: string;
+}
+
+export interface IArrowElement extends IBaseElement {
+  type: 'arrow';
+}
+
+export interface ITextElement extends IBaseElement {
+  type: 'text';
+  text: string;
 }
 
 export interface IEvent extends MouseEvent {
   clientX: number;
   clientY: number;
 }
+
+export type IElement = ILineElement | IRectangleElement | ICircleElement | IDiamondElement | IPencilElement | IArrowElement | ITextElement;
 
 export interface IPoint {
   x: number;
@@ -75,19 +108,27 @@ const formatOptions = (options: IOptions): INewOptions => ({
 
 const distance = (a: IPoint, b: IPoint) => Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 
-export const createElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string, options: IOptions | null = null) => {
+export const createElement = (
+  id: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  type: string,
+  options: IOptions | null = null
+): IElement => {
   const newOptions = options ? formatOptions(options) : null;
 
   switch (type) {
     case 'line':
       if (!newOptions) throw new Error('Options are required');
-      return { id, type, x1, y1, x2, y2, roughElement: generator.line(x1, y1, x2, y2, newOptions) };
+      return { id, type, x1, y1, x2, y2, roughElement: generator.line(x1, y1, x2, y2, newOptions) } as ILineElement;
     case 'rectangle':
       if (!newOptions) throw new Error('Options are required');
-      return { id, type, x1, y1, x2, y2, roughElement: generator.rectangle(x1, y1, x2 - x1, y2 - y1, newOptions) };
+      return { id, type, x1, y1, x2, y2, roughElement: generator.rectangle(x1, y1, x2 - x1, y2 - y1, newOptions) } as IRectangleElement;
     case 'circle':
       if (!newOptions) throw new Error('Options are required');
-      return { id, type, x1, y1, x2, y2, roughElement: generator.circle(x1, y1, x2 - x1, newOptions) };
+      return { id, type, x1, y1, x2, y2, roughElement: generator.circle(x1, y1, x2 - x1, newOptions) } as ICircleElement;
     case 'diamond':
       const points = [
         [x1, y1 + (y2 - y1) / 2],
@@ -96,13 +137,13 @@ export const createElement = (id: number, x1: number, y1: number, x2: number, y2
         [x1 + (x2 - x1) / 2, y2],
       ];
       if (!newOptions) throw new Error('Options are required');
-      return { id, type, x1, y1, x2, y2, roughElement: generator.polygon(points as Point[], newOptions) };
+      return { id, type, x1, y1, x2, y2, roughElement: generator.polygon(points as Point[], newOptions) } as IDiamondElement;
     case 'pencil':
-      return { id, type, points: [{ x: x1, y: y1 }] };
+      return { id, type, points: [{ x: x1, y: y1 }] } as IPencilElement;
     case 'arrow':
-      return { id, type, x1, y1, x2, y2 };
+      return { id, type, x1, y1, x2, y2 } as IArrowElement;
     case 'text':
-      return { id, type, x1, y1, x2, y2, text: '' };
+      return { id, type, x1, y1, x2, y2, text: '' } as ITextElement;
     default:
       throw new Error(`Type not recognized: ${type}`);
   }
