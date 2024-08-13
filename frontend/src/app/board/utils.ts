@@ -96,7 +96,7 @@ export const createElement = (id: number, x1: number, y1: number, x2: number, y2
     case 'arrow':
       return { id, type, x1, y1, x2, y2 };
     case 'text':
-      return { id, type, x1, y1, x2, y2 };
+      return { id, type, x1, y1, x2, y2, text: '' };
     default:
       throw new Error(`Type not recognized: ${type}`);
   }
@@ -149,7 +149,9 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       });
       break;
     case 'text':
-      // context.fillText('Text', element.x1, element.y1);
+      context.textBaseline = 'top';
+      context.font = '24px sans-serif';
+      context.fillText(element.text, element.x1, element.y1);
       break;
     default:
       throw new Error(`Type not recognized: ${element.type}`);
@@ -235,8 +237,9 @@ function positionWithElement(x: number, y: number, element: IElement) {
       });
       return betweenAnyPoint ? 'inside' : null;
     case 'arrow':
+      break;
     case 'text':
-      return false;
+      return x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null;
     default:
       throw new Error(`Type not recognized: ${type}`);
   }
@@ -311,23 +314,3 @@ export const resizedCoordinates = (
       return { x1, y1, x2, y2 };
   }
 };
-
-// export const addInput = (x: number, y: number, ctx) => {
-//   const input = document.createElement('input') as HTMLInputElement;
-//   input.type = 'text';
-//   input.style.position = 'absolute';
-//   input.style.left = `${x}px`;
-//   input.style.top = `${y}px`;
-//   input.onkeydown = (e) => handleEnter(e, ctx, x, y);
-//   document.body.appendChild(input);
-//   input.focus();
-// };
-
-// const handleEnter = (e, ctx, x, y) => {
-//   var keyCode = e.keyCode;
-//   if (keyCode === 13) {
-//     ctx.font = '20px Arial';
-//     ctx.fillText(e.target.value, x, y);
-//     document.body.removeChild(e.target);
-//   }
-// };

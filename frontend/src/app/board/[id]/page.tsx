@@ -1,5 +1,5 @@
 'use client';
-import { useState, useLayoutEffect, useEffect, useCallback } from 'react';
+import { useState, useLayoutEffect, useEffect, useCallback, useRef } from 'react';
 import Arrow from '@/components/Arrow/Arrow';
 import BoardButton from '@/components/BoardButton/BoardButton';
 import ToolPicker from '@/components/ToolPicker/ToolPicker';
@@ -63,6 +63,7 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
   const [selectedElement, setSelectedElement] = useState<IElement | null>(null);
   const [action, setAction] = useState('none');
   const [dataURL, setDataURL] = useState('');
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   console.log(`Board id: ${params.id}`);
   const seed = Math.floor(Math.random() * 2 ** 31);
@@ -82,10 +83,13 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.save();
-    elements.forEach((element: IElement) => drawElement(roughCanvas, context, element));
+    elements.forEach((element: IElement) => {
+      if (action === 'writing' && selectedElement.id === element.id) return;
+      drawElement(roughCanvas, context, element);
+    });
     context.restore();
     setIsHidden(false);
-  }, [elements, action]);
+  }, [elements, action, selectedElement]);
 
   useLayoutEffect(() => {
     const handleResize = () => {
@@ -127,7 +131,17 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     };
   }, [undo, redo]);
 
-  const updateElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string) => {
+  useEffect(() => {
+    const textArea = textAreaRef.current;
+    if (action === 'writing') {
+      setTimeout(() => {
+        textArea.focus();
+        textArea.value = selectedElement.text;
+      }, 0);
+    }
+  }, [action, selectedElement]);
+
+  const updateElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string, textOptions = null) => {
     const elementsCopy: IElement[] = [...elements];
 
     switch (type) {
@@ -142,6 +156,12 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
         elementsCopy[id].points = [...elementsCopy[id].points, { x: x2, y: y2 }];
         break;
       case 'text':
+        const textWidth = document.getElementById('canvas').getContext('2d').measureText(textOptions.text).width;
+        const textHeight = 24;
+        elementsCopy[id] = {
+          ...createElement(id, x1, y1, x1 + textWidth, y1 + textHeight, type, options),
+          text: textOptions.text,
+        };
         break;
       default:
         throw new Error(`Type not recognized: ${type}`);
@@ -150,6 +170,7 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
   };
 
   const handleMouseDown: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
+    if (action === 'writing') return;
     const { clientX, clientY } = getMouseCoordinates(event);
     if (tool === 'pointer') {
       const element = getElementAtPosition(clientX, clientY, elements);
@@ -212,7 +233,8 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
         if (!offsetX || !offsetY) return;
         const newX1 = clientX - offsetX;
         const newY1 = clientY - offsetY;
-        updateElement(id, newX1, newY1, newX1 + width, newY1 + height, type);
+        const options = type === 'text' ? { text: selectedElement.text } : {};
+        updateElement(id, newX1, newY1, newX1 + width, newY1 + height, type, options);
       }
     } else if (action === 'resize') {
       if (!selectedElement) return;
@@ -222,8 +244,18 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     }
   };
 
-  const handleMouseUp: React.MouseEventHandler<HTMLCanvasElement> = () => {
+  const handleMouseUp: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
+    const { clientX, clientY } = getMouseCoordinates(event);
     if (selectedElement) {
+      if (
+        selectedElement.type === 'text' &&
+        clientX - selectedElement.offsetX === selectedElement.x1 &&
+        clientY - selectedElement.offsetY === selectedElement.y1
+      ) {
+        setAction('writing');
+        return;
+      }
+
       const index = selectedElement.id;
       const { id, type } = elements[index];
       if ((action === 'drawing' || action === 'resize') && adjustmentRequired(type)) {
@@ -232,8 +264,17 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
       }
     }
 
+    if (action === 'writing') return;
+
     setAction('none');
     setSelectedElement(null);
+  };
+
+  const handleBlur = (event) => {
+    const { id, x1, y1, type } = selectedElement;
+    setAction('none');
+    setSelectedElement(null);
+    updateElement(id, x1, y1, null, null, type, { text: event.target.value });
   };
 
   const handleChatOpen = () => {
@@ -246,13 +287,34 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
     <div className='w-full h-screen'>
       <canvas
         id='canvas'
-        className='w-full h-full relative'
+        className='w-full h-screen relative'
         width={dimensions.width}
         height={dimensions.height}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       ></canvas>
+      {action === 'writing' ? (
+        <textarea
+          ref={textAreaRef}
+          onBlur={handleBlur}
+          style={{
+            position: 'fixed',
+            top: selectedElement.y1 - 5,
+            left: selectedElement.x1,
+            font: '24px sans-serif',
+            margin: 0,
+            padding: 0,
+            border: 0,
+            outline: 0,
+            resize: 'auto',
+            overflow: 'hidden',
+            whiteSpace: 'pre',
+            background: 'transparent',
+            zIndex: 2,
+          }}
+        />
+      ) : null}
       <div className='flex items-center justify-center absolute top-7 left-7 w-full'>
         <Arrow className='absolute left-2.5' fn={handleGoBack} />
         <ToolPicker className='flex justify-center flex-grow mx-auto' activeTool={tool} setActiveTool={setTool} tools={tools} />
