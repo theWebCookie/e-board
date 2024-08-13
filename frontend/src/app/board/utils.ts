@@ -15,11 +15,12 @@ export interface IElement {
   type: string;
   points: Point[];
   id: number;
-  position?: string;
+  position?: string | null;
   offsetX?: number;
   offsetY?: number;
   xOffsetX: number[];
   yOffsetY: number[];
+  text?: string;
 }
 
 export interface IEvent extends MouseEvent {
@@ -74,14 +75,18 @@ const formatOptions = (options: IOptions): INewOptions => ({
 
 const distance = (a: IPoint, b: IPoint) => Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 
-export const createElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string, options: IOptions) => {
-  const newOptions = formatOptions(options);
+export const createElement = (id: number, x1: number, y1: number, x2: number, y2: number, type: string, options: IOptions | null = null) => {
+  const newOptions = options ? formatOptions(options) : null;
+
   switch (type) {
     case 'line':
+      if (!newOptions) throw new Error('Options are required');
       return { id, type, x1, y1, x2, y2, roughElement: generator.line(x1, y1, x2, y2, newOptions) };
     case 'rectangle':
+      if (!newOptions) throw new Error('Options are required');
       return { id, type, x1, y1, x2, y2, roughElement: generator.rectangle(x1, y1, x2 - x1, y2 - y1, newOptions) };
     case 'circle':
+      if (!newOptions) throw new Error('Options are required');
       return { id, type, x1, y1, x2, y2, roughElement: generator.circle(x1, y1, x2 - x1, newOptions) };
     case 'diamond':
       const points = [
@@ -90,6 +95,7 @@ export const createElement = (id: number, x1: number, y1: number, x2: number, y2
         [x2, y1 + (y2 - y1) / 2],
         [x1 + (x2 - x1) / 2, y2],
       ];
+      if (!newOptions) throw new Error('Options are required');
       return { id, type, x1, y1, x2, y2, roughElement: generator.polygon(points as Point[], newOptions) };
     case 'pencil':
       return { id, type, points: [{ x: x1, y: y1 }] };
@@ -149,13 +155,55 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       });
       break;
     case 'text':
-      context.textBaseline = 'top';
-      context.font = '24px sans-serif';
-      context.fillText(element.text, element.x1, element.y1);
+      if (context instanceof CanvasRenderingContext2D) {
+        context.textBaseline = 'top';
+        context.font = '24px sans-serif';
+        if (element.text) context.fillText(element.text, element.x1, element.y1);
+      }
       break;
     default:
       throw new Error(`Type not recognized: ${element.type}`);
   }
+};
+
+export const updateElement = (
+  elements: IElement[],
+  id: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  type: string,
+  textOptions = null,
+  options = null,
+  setElements: (arg0: IElement[], arg1: boolean) => void
+) => {
+  const elementsCopy: IElement[] = [...elements];
+
+  switch (type) {
+    case 'line':
+    case 'circle':
+    case 'diamond':
+    case 'rectangle':
+    case 'arrow':
+      elementsCopy[id] = createElement(id, x1, y1, x2, y2, type, options);
+      break;
+    case 'pencil':
+      elementsCopy[id].points = [...elementsCopy[id].points, { x: x2, y: y2 }];
+      break;
+    case 'text':
+      // @ts-ignore
+      const textWidth = document.getElementById('canvas')!.getContext('2d').measureText(textOptions.text).width;
+      const textHeight = 24;
+      elementsCopy[id] = {
+        ...createElement(id, x1, y1, x1 + textWidth, y1 + textHeight, type),
+        text: textOptions.text,
+      };
+      break;
+    default:
+      throw new Error(`Type not recognized: ${type}`);
+  }
+  setElements(elementsCopy, true);
 };
 
 export const getMouseCoordinates = (event: { clientX: number; clientY: number }) => {
