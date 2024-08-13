@@ -21,6 +21,7 @@ export interface IBaseElement {
 export interface ILineElement extends IBaseElement {
   type: 'line';
   roughElement: Drawable;
+  points: Point[];
 }
 
 export interface IRectangleElement extends IBaseElement {
@@ -139,7 +140,7 @@ export const createElement = (
       if (!newOptions) throw new Error('Options are required');
       return { id, type, x1, y1, x2, y2, roughElement: generator.polygon(points as Point[], newOptions) } as IDiamondElement;
     case 'pencil':
-      return { id, type, points: [{ x: x1, y: y1 }] } as IPencilElement;
+      return { id, type, points: [{ x: x1, y: y1 }] } as unknown as IPencilElement;
     case 'arrow':
       return { id, type, x1, y1, x2, y2 } as IArrowElement;
     case 'text':
@@ -230,7 +231,7 @@ export const updateElement = (
       elementsCopy[id] = createElement(id, x1, y1, x2, y2, type, options);
       break;
     case 'pencil':
-      elementsCopy[id].points = [...elementsCopy[id].points, { x: x2, y: y2 }];
+      (elementsCopy[id] as IPencilElement).points = [...(elementsCopy[id] as IPencilElement).points, { x: x2, y: y2 }];
       break;
     case 'text':
       // @ts-ignore

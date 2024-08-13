@@ -24,7 +24,7 @@ interface ICanvasProps {
 }
 
 const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
-  const { state: elements, setState: setElements, undo, redo } = useHistory([]);
+  const { state: elements, setState: setElements, undo, redo } = useHistory<IElement[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [selectedElement, setSelectedElement] = useState<IElement | null>(null);
   const [action, setAction] = useState('none');
@@ -204,8 +204,8 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
     setSelectedElement(null);
   };
 
-  const handleBlur = (event) => {
-    const { id, x1, y1, type } = selectedElement;
+  const handleBlur = (event: React.FocusEvent<HTMLTextAreaElement>) => {
+    const { id, x1, y1, type } = selectedElement as IElement;
     setAction('none');
     setSelectedElement(null);
     updateElement(elements, id, x1, y1, null, null, type, { text: event.target.value }, null, setElements);
@@ -227,8 +227,8 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
           onBlur={handleBlur}
           style={{
             position: 'fixed',
-            top: selectedElement.y1 - 5,
-            left: selectedElement.x1,
+            top: selectedElement ? selectedElement.y1 - 5 : 0,
+            left: selectedElement?.x1,
             font: '24px sans-serif',
             margin: 0,
             padding: 0,
