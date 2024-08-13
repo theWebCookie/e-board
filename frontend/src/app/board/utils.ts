@@ -199,7 +199,7 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
     case 'text':
       if (context instanceof CanvasRenderingContext2D) {
         context.textBaseline = 'top';
-        context.font = '24px sans-serif';
+        context.font = '24px Pacifico, cursive';
         if (element.text) context.fillText(element.text, element.x1, element.y1);
       }
       break;

@@ -39,6 +39,7 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
     const url = canvas.toDataURL();
     setDataURL(url);
 
+    context.font = '24px Pacifico, cursive';
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.save();
     elements.forEach((element: IElement) => {
@@ -229,7 +230,7 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
             position: 'fixed',
             top: selectedElement ? selectedElement.y1 - 5 : 0,
             left: selectedElement?.x1,
-            font: '24px sans-serif',
+            font: '24px Pacifico, cursive',
             margin: 0,
             padding: 0,
             border: 0,
