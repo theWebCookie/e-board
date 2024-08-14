@@ -1,5 +1,5 @@
 import { IOptions } from '@/app/board/[id]/page';
-import useHistory from '@/app/board/useHistory';
+import useHistory from '@/components/Canvas/useHistory';
 import {
   adjustElementCoordinates,
   adjustmentRequired,
@@ -16,6 +16,7 @@ import {
 } from '@/app/board/utils';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import rough from 'roughjs';
+import usePressedKeys from './usePressedKeys';
 
 interface ICanvasProps {
   setIsHidden: (isHidden: boolean) => void;
@@ -29,19 +30,25 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
   const [selectedElement, setSelectedElement] = useState<IElement | null>(null);
   const [action, setAction] = useState('none');
   const [dataURL, setDataURL] = useState('');
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [startPanMousePosition, setStartPanMousePosition] = useState({ x: 0, y: 0 });
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const pressedKeys = usePressedKeys();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
     const context = canvas.getContext('2d') as CanvasRenderingContext2D;
-
     const roughCanvas = rough.canvas(canvas);
+
     const url = canvas.toDataURL();
     setDataURL(url);
 
     context.font = '24px Pacifico, cursive';
     context.clearRect(0, 0, canvas.width, canvas.height);
+
     context.save();
+    context.translate(panOffset.x, panOffset.y);
+
     elements.forEach((element: IElement) => {
       if (action === 'writing' && selectedElement!.id === element.id) return;
       drawElement(roughCanvas, context, element);
@@ -49,9 +56,9 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
     context.restore();
     setIsHidden(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elements, action, selectedElement]);
+  }, [elements, action, selectedElement, panOffset]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const handleResize = () => {
       setDimensions({ width: window.innerWidth, height: window.innerHeight });
     };
@@ -61,6 +68,7 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
   useEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
     console.log(canvas.toDataURL());
@@ -101,9 +109,29 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensions]);
 
+  useEffect(() => {
+    const panFunction = (event: WheelEvent) => {
+      setPanOffset((prevState) => ({
+        x: prevState.x - event.deltaX,
+        y: prevState.y - event.deltaY,
+      }));
+    };
+    document.addEventListener('wheel', panFunction);
+    return () => {
+      document.removeEventListener('wheel', panFunction);
+    };
+  }, []);
+
   const handleMouseDown: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
     if (action === 'writing') return;
-    const { clientX, clientY } = getMouseCoordinates(event);
+    const { clientX, clientY } = getMouseCoordinates(event, panOffset);
+
+    if (event.button === 1 || pressedKeys.has(' ')) {
+      setAction('panning');
+      setStartPanMousePosition({ x: clientX, y: clientY });
+      return;
+    }
+
     if (tool === 'pointer') {
       const element = getElementAtPosition(clientX, clientY, elements);
       if (element) {
@@ -137,7 +165,18 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
   };
 
   const handleMouseMove: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
-    const { clientX, clientY } = getMouseCoordinates(event);
+    const { clientX, clientY } = getMouseCoordinates(event, panOffset);
+
+    if (action === 'panning') {
+      const deltaX = clientX - startPanMousePosition.x;
+      const deltaY = clientY - startPanMousePosition.y;
+      setPanOffset((prevState) => ({
+        x: prevState.x + deltaX,
+        y: prevState.y + deltaY,
+      }));
+      return;
+    }
+
     if (tool === 'pointer') {
       const target = event.target as HTMLCanvasElement;
       const element = getElementAtPosition(clientX, clientY, elements);
@@ -180,7 +219,7 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
   };
 
   const handleMouseUp: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
-    const { clientX, clientY } = getMouseCoordinates(event);
+    const { clientX, clientY } = getMouseCoordinates(event, panOffset);
     if (selectedElement) {
       if (
         selectedElement.type === 'text' &&
@@ -228,8 +267,8 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, tool, options }) => {
           onBlur={handleBlur}
           style={{
             position: 'fixed',
-            top: selectedElement ? selectedElement.y1 - 5 : 0,
-            left: selectedElement?.x1,
+            top: selectedElement!.y1 + panOffset.y,
+            left: selectedElement!.x1 + panOffset.x,
             font: '24px Pacifico, cursive',
             margin: 0,
             padding: 0,

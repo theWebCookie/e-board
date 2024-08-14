@@ -248,9 +248,9 @@ export const updateElement = (
   setElements(elementsCopy, true);
 };
 
-export const getMouseCoordinates = (event: { clientX: number; clientY: number }) => {
-  const clientX = event.clientX;
-  const clientY = event.clientY;
+export const getMouseCoordinates = (event: { clientX: number; clientY: number }, panOffset: { x: number; y: number }) => {
+  const clientX = event.clientX - panOffset.x;
+  const clientY = event.clientY - panOffset.y;
   return { clientX, clientY };
 };
 
