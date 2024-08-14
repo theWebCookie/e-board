@@ -142,6 +142,9 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, setTool, tool, options })
     const { clientX, clientY } = getMouseCoordinates(event, panOffset, scaleOffset, scale);
 
     if (event.button === 1 || pressedKeys.has(' ')) {
+      const target = event.target as HTMLCanvasElement;
+      target.style.cursor = 'grab';
+      setTool('pointer');
       setAction('panning');
       setStartPanMousePosition({ x: clientX, y: clientY });
       return;
@@ -182,6 +185,22 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, setTool, tool, options })
   const handleMouseMove: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
     const { clientX, clientY } = getMouseCoordinates(event, panOffset, scaleOffset, scale);
 
+    const target = event.target as HTMLCanvasElement;
+    let cursorType = 'default';
+
+    if (tool === 'pointer' && action === 'panning') {
+      cursorType = 'grab';
+    } else if (tool === 'pointer' && (action === 'none' || action === 'panning')) {
+      const element = getElementAtPosition(clientX, clientY, elements);
+      cursorType = element ? cursorForPosition(element.position) : 'default';
+    } else if (tool === 'text') {
+      cursorType = 'text';
+    } else {
+      cursorType = 'crosshair';
+    }
+
+    target.style.cursor = cursorType;
+
     if (action === 'panning') {
       const deltaX = clientX - startPanMousePosition.x;
       const deltaY = clientY - startPanMousePosition.y;
@@ -192,11 +211,6 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, setTool, tool, options })
       return;
     }
 
-    if (tool === 'pointer') {
-      const target = event.target as HTMLCanvasElement;
-      const element = getElementAtPosition(clientX, clientY, elements);
-      target.style.cursor = element ? cursorForPosition(element.position) : 'default';
-    }
     if (action === 'drawing') {
       const index = elements.length - 1;
       const { x1, y1 } = elements[index];
@@ -255,7 +269,6 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, setTool, tool, options })
 
     if (action === 'writing') return;
 
-    setTool('pointer');
     setAction('none');
     setSelectedElement(null);
   };

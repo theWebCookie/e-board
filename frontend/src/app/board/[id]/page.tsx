@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Arrow from '@/components/Arrow/Arrow';
 import BoardButton from '@/components/BoardButton/BoardButton';
 import ToolPicker from '@/components/ToolPicker/ToolPicker';
