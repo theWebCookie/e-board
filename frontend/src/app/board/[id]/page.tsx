@@ -63,7 +63,7 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
 
   return (
     <div className='w-full h-screen'>
-      <Canvas setIsHidden={setIsHidden} tool={tool} options={options} />
+      <Canvas setIsHidden={setIsHidden} setTool={setTool} tool={tool} options={options} />
       <div className='flex items-center justify-center absolute top-7 left-7 w-full'>
         <Arrow className='absolute left-2.5' fn={handleGoBack} />
         <ToolPicker className='flex justify-center flex-grow mx-auto' activeTool={tool} setActiveTool={setTool} tools={tools} />
