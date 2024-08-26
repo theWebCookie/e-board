@@ -2,9 +2,8 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 const isAuthenticated = () => {
-  const sessionId = cookies().get('sessionId');
-  const userId = cookies().get('userId');
-  return !!(sessionId && userId);
+  const token = cookies().get('token');
+  return token;
 };
 
 export async function middleware(request: NextRequest) {
