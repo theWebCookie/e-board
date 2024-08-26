@@ -15,8 +15,7 @@ export async function getCookie(name: string) {
 export async function removeCookies() {
   return new Promise<void>((resolve) => {
     const cookieStore = cookies();
-    cookieStore.delete('userId');
-    cookieStore.delete('sessionId');
+    cookieStore.delete('token');
     resolve();
   });
 }
