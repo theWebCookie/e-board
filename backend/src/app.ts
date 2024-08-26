@@ -12,12 +12,14 @@ declare module 'express-session' {
   }
 }
 
-interface appConfig {
+export interface IAppConfig {
   port: number;
   jwtSecret: string;
+  issuer: string;
+  audience: string;
 }
 
-const appConfig = config.get<appConfig>('app');
+const appConfig = config.get<IAppConfig>('app');
 const prisma = new PrismaClient();
 const app: Application = express();
 const port = appConfig.port;
@@ -28,25 +30,26 @@ app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
+const jwtOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: appConfig.jwtSecret,
+  issuer: appConfig.issuer,
+  audience: appConfig.audience,
+};
+
 passport.use(
-  new JwtStrategy(
-    {
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: appConfig.jwtSecret,
-    },
-    async (jwtPayload, done) => {
-      try {
-        const user = await prisma.user.findUnique({ where: { id: jwtPayload.id } });
-        if (user) {
-          return done(null, user);
-        } else {
-          return done(null, false);
-        }
-      } catch (error) {
-        return done(error, false);
+  new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
+    try {
+      const user = await prisma.user.findUnique({ where: { id: jwtPayload.id } });
+      if (user) {
+        return done(null, user);
+      } else {
+        return done(null, false);
       }
+    } catch (error) {
+      return done(error, false);
     }
-  )
+  })
 );
 
 passport.serializeUser((user: any, done) => {

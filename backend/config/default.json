@@ -1,6 +1,8 @@
 {
   "app": {
     "port": 3500,
-    "jwtSecret": "MPpT2HY8iXGQtlocYBxA33m3myx8dnpO"
+    "jwtSecret": "MPpT2HY8iXGQtlocYBxA33m3myx8dnpO",
+    "audience": "http://localhost:3000",
+    "issuer": "http://localhost:3500"
   }
 }
