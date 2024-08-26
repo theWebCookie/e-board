@@ -1,71 +1,68 @@
 import { PrismaClient } from '@prisma/client';
 import express, { Application } from 'express';
-import session from 'express-session';
-import config from 'config';
 import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
-import bcrypt from 'bcrypt';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import config from 'config';
 import { router } from './routes';
+import session from 'express-session';
+
+declare module 'express-session' {
+  export interface SessionData {
+    jwtToken?: string;
+  }
+}
 
 interface appConfig {
   port: number;
-  sessionSecret: string;
+  jwtSecret: string;
 }
 
 const appConfig = config.get<appConfig>('app');
-
+const prisma = new PrismaClient();
 const app: Application = express();
 const port = appConfig.port;
-const prisma = new PrismaClient();
+
+app.use(session({ secret: appConfig.jwtSecret, resave: false, saveUninitialized: false, cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } }));
 
 app.use(express.json());
-
-app.use(
-  session({
-    secret: appConfig.sessionSecret,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
-
 app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(
-  'local',
-  new LocalStrategy({ usernameField: 'name', passwordField: 'password' }, async (name, password, done) => {
-    const user = await prisma.user.findFirst({ where: { name: name } });
-    console.log('user', user);
-    if (!user) {
-      return done(null, false, { message: 'User not found' });
+  new JwtStrategy(
+    {
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: appConfig.jwtSecret,
+    },
+    async (jwtPayload, done) => {
+      try {
+        const user = await prisma.user.findUnique({ where: { id: jwtPayload.id } });
+        if (user) {
+          return done(null, user);
+        } else {
+          return done(null, false);
+        }
+      } catch (error) {
+        return done(error, false);
+      }
     }
-
-    const isPasswordValid = await bcrypt.compare(password, user.hashed_password);
-    if (!isPasswordValid) {
-      return done(null, false, { message: 'Invalid password' });
-    }
-
-    return done(null, user);
-  })
+  )
 );
 
-passport.serializeUser((user, done) => {
-  done(null, user);
+passport.serializeUser((user: any, done) => {
+  done(null, user.id);
 });
 
-passport.deserializeUser((id: number, done) => {
+passport.deserializeUser(async (id: number, done) => {
   try {
-    const user = prisma.user.findFirst({ where: { id } });
+    const user = await prisma.user.findUnique({ where: { id } });
     done(null, user);
   } catch (error) {
     done(error, null);
   }
 });
 
-async function main() {
-  // const allUsers = await prisma.user.findMany();
-  // console.dir(allUsers, { depth: null });
-}
+async function main() {}
 
 main()
   .then(async () => {

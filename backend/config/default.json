@@ -1,6 +1,6 @@
 {
   "app": {
     "port": 3500,
-    "sessionSecret": "MPpT2HY8iXGQtlocYBxA33m3myx8dnpO"
+    "jwtSecret": "MPpT2HY8iXGQtlocYBxA33m3myx8dnpO"
   }
 }
