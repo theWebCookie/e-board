@@ -1,8 +1,16 @@
 import { getCookie } from '@/lib/cookies';
 
 export async function GET() {
-  const userId = await getCookie('userId');
-  const res = await fetch(`http://localhost:3500/api/userBoards/${userId!.value}`);
+  const tokenCookie = await getCookie('token');
+  const token = tokenCookie!.value;
+
+  const res = await fetch('http://localhost:3500/api/userBoards', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!res.ok) {
     const errorData = await res.json();

@@ -3,6 +3,10 @@ import { Request, Response } from 'express';
 import { inviteCodeLength } from '../config';
 import { PrismaClient } from '@prisma/client';
 
+interface CustomJwtPayload {
+  id: string;
+}
+
 const prisma = new PrismaClient();
 
 const getInviteCode = () => {
@@ -118,7 +122,7 @@ export const boardUsers = async (req: Request, res: Response): Promise<void> => 
 };
 
 export const userBoards = async (req: Request, res: Response): Promise<void> => {
-  const { userId } = req.params;
+  const userId = (req.user as CustomJwtPayload).id;
 
   const userBoards = await prisma.usersOnBoards.findMany({
     where: {

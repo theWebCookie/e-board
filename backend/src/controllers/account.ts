@@ -2,25 +2,13 @@ import { PrismaClient } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { saltRounds } from '../config';
-import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import config from 'config';
+import { IAppConfig } from '../app';
 
 const prisma = new PrismaClient();
-const jwtSecret = config.get<string>('app.jwtSecret');
 
-export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate('jwt', { session: false }, (err: any, user: any) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    if (!user) {
-      return res.status(401).json({ error: 'Brak autoryzacji.' });
-    }
-    req.user = user;
-    next();
-  })(req, res, next);
-};
+const appConfig = config.get<IAppConfig>('app');
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   const { name, email, password } = req.body;
@@ -40,7 +28,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       },
     });
 
-    const token = jwt.sign({ id: newUser.id }, jwtSecret, { expiresIn: '4h' });
+    const token = jwt.sign({ id: newUser.id }, appConfig.jwtSecret, {
+      expiresIn: '4h',
+      issuer: appConfig.issuer,
+      audience: appConfig.audience,
+    });
 
     req.session.jwtToken = token;
 
@@ -68,7 +60,11 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
       return;
     }
 
-    const token = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: '4h' });
+    const token = jwt.sign({ id: user.id }, appConfig.jwtSecret, {
+      expiresIn: '4h',
+      issuer: appConfig.issuer,
+      audience: appConfig.audience,
+    });
 
     req.session.jwtToken = token;
 
