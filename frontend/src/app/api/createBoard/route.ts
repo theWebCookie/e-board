@@ -1,3 +1,4 @@
+import { getCookie } from '@/lib/cookies';
 import { NextRequest } from 'next/server';
 
 export async function GET() {
@@ -13,13 +14,17 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { name, userId } = body;
+  const { name } = body;
+  const tokenCookie = await getCookie('token');
+  const token = tokenCookie!.value;
+
   const res = await fetch('http://localhost:3500/api/create', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ name, userId }),
+    body: JSON.stringify({ name }),
   });
 
   if (!res.ok) {

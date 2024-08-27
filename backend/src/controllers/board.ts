@@ -69,7 +69,8 @@ export const handleInviteByCode = async (req: Request, res: Response): Promise<v
 };
 
 export const create = async (req: Request, res: Response): Promise<void> => {
-  const { name, userId } = req.body;
+  const { name } = req.body;
+  const userId = (req.user as CustomJwtPayload).id;
   const boardId = uuidv4();
   const boardInviteCode = getInviteCode();
 

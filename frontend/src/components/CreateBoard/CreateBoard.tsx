@@ -31,9 +31,9 @@ const CreateBoard = () => {
       return;
     }
 
-    const userId = await getCookie('userId');
+    const token = await getCookie('token');
 
-    if (userId === undefined) {
+    if (token === undefined) {
       return;
     }
 
@@ -42,7 +42,7 @@ const CreateBoard = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name: boardName, userId: userId.value }),
+      body: JSON.stringify({ name: boardName }),
     });
 
     if (!res.ok) {
