@@ -149,12 +149,22 @@ export const userBoards = async (req: Request, res: Response): Promise<void> => 
     },
   });
 
+  const boardInvites = await prisma.boardInvite.findMany({
+    where: {
+      boardId: {
+        in: boardIds,
+      },
+    },
+  });
+
   const boardsWithUsers = boardIds.map((boardId) => {
     const board = userBoards.find((ub) => ub.boardId === boardId)?.Board;
     const users = boardUsers.filter((bu) => bu.boardId === boardId).map((bu) => bu.User);
+    const inviteCode = boardInvites.find((bi) => bi.boardId === boardId)?.code;
     return {
       ...board,
       users,
+      inviteCode,
     };
   });
 

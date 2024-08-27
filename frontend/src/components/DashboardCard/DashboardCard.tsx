@@ -9,11 +9,16 @@ import DashboardCardDescription from './DashboardCardDescription';
 import Image from 'next/image';
 import CardDrawer from './CardDrawer';
 
-const DashboardCard: React.FC<IBoardWithUsers> = ({ name, id, users }) => {
+interface IDashboardCardProps {
+  board: IBoardWithUsers;
+}
+
+const DashboardCard: React.FC<IDashboardCardProps> = ({ board }) => {
+  const { id, name, users } = board;
   return (
     <Card className='max-w-xs w-80 relative'>
       <div className='absolute top-6 right-6'>
-        <CardDrawer name={name} users={users}>
+        <CardDrawer boardInfo={board}>
           <Image src='/info.svg' alt='info' width={20} height={20} />
         </CardDrawer>
       </div>

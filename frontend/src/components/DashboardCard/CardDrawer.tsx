@@ -3,14 +3,19 @@ import { Button } from '../ui/button';
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '../ui/drawer';
 import CardDrawerDescription from './CardDrawerDescription';
 import Image from 'next/image';
+import { Toaster } from '../ui/toaster';
 
 interface ICardDrawerProps {
   children: React.ReactNode;
-  name: string;
-  users: IUser[];
+  boardInfo: {
+    name: string;
+    users: IUser[];
+    inviteCode: string;
+  };
 }
 
-const CardDrawer: React.FC<ICardDrawerProps> = ({ children, name, users }) => {
+const CardDrawer: React.FC<ICardDrawerProps> = ({ children, boardInfo }) => {
+  const { name, users, inviteCode } = boardInfo;
   const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
   return (
     <Drawer>
@@ -18,7 +23,7 @@ const CardDrawer: React.FC<ICardDrawerProps> = ({ children, name, users }) => {
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{capitalizedName}</DrawerTitle>
-          <CardDrawerDescription users={users} />
+          <CardDrawerDescription users={users} inviteCode={inviteCode} />
         </DrawerHeader>
         <DrawerFooter>
           <DrawerClose>
@@ -28,6 +33,7 @@ const CardDrawer: React.FC<ICardDrawerProps> = ({ children, name, users }) => {
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
+      <Toaster />
     </Drawer>
   );
 };

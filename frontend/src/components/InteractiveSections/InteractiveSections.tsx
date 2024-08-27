@@ -34,9 +34,7 @@ const InteractiveSections = () => {
       </section>
       <Separator />
       <section className='flex gap-5 items-center flex-wrap my-3'>
-        {boards
-          ? boards.map((board: IBoardWithUsers) => <DashboardCard key={board.id} name={board.name} id={board.id} users={board.users} />)
-          : 'Brak tablic'}
+        {boards ? boards.map((board: IBoardWithUsers) => <DashboardCard key={board.id} board={board} />) : 'Brak tablic'}
       </section>
     </>
   );

@@ -15,6 +15,8 @@ export interface IBoard {
 
 export interface IBoardWithUsers extends IBoard {
   users: IUser[];
+  board: IBoard;
+  inviteCode: string;
 }
 
 const Home = () => {
