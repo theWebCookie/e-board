@@ -1,15 +1,22 @@
 import { IBoardWithUsers } from '@/app/home/page';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { User } from 'lucide-react';
 import { Tooltip, TooltipProvider } from '../ui/tooltip';
 import { TooltipContent, TooltipTrigger } from '@radix-ui/react-tooltip';
 import DashboardCardDescription from './DashboardCardDescription';
+import Image from 'next/image';
+import CardDrawer from './CardDrawer';
 
 const DashboardCard: React.FC<IBoardWithUsers> = ({ name, id, users }) => {
   return (
-    <Card className='max-w-xs w-80'>
+    <Card className='max-w-xs w-80 relative'>
+      <div className='absolute top-6 right-6'>
+        <CardDrawer name={name} users={users}>
+          <Image src='/info.svg' alt='info' width={20} height={20} />
+        </CardDrawer>
+      </div>
       <CardHeader>
         <CardTitle>{name}</CardTitle>
         <DashboardCardDescription numOfUsers={users.length} />

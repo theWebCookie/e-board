@@ -6,6 +6,7 @@ import React from 'react';
 
 export interface IUser {
   name: string;
+  email: string;
 }
 export interface IBoard {
   name: string;
