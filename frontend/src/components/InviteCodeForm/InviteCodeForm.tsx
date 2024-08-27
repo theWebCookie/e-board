@@ -11,7 +11,6 @@ import { Toaster } from '../ui/toaster';
 import { useToast } from '../ui/use-toast';
 import { boardToastDictionary, toastTimeout } from '@config';
 import { useRouter } from 'next/navigation';
-import { getCookie } from '@/lib/cookies';
 
 const InviteFormCode = () => {
   const [isDisabled, setIsDisabled] = useState<boolean>(true);
