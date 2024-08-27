@@ -14,8 +14,9 @@ const getInviteCode = () => {
 };
 
 export const handleInviteByCode = async (req: Request, res: Response): Promise<void> => {
-  const { code, userId } = req.body;
+  const { code } = req.body;
   let boardId;
+  const userId = (req.user as CustomJwtPayload).id;
 
   if (!code || code.length !== inviteCodeLength) {
     res.status(400).json({ error: 'Błędny kod!' });
@@ -61,6 +62,7 @@ export const handleInviteByCode = async (req: Request, res: Response): Promise<v
     });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ error });
   }
 
   res.status(200).json({ message: 'Kod zaakceptowany!', boardId });

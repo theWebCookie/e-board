@@ -25,14 +25,12 @@ const InviteFormCode = () => {
   const router = useRouter();
 
   const onSubmit = async (values: z.infer<typeof inviteFormSchema>) => {
-    const userId = await getCookie('userId');
-    if (userId === undefined) return;
     const res = await fetch('/api/invite', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ code: values.code, userId: userId.value }),
+      body: JSON.stringify({ code: values.code }),
     });
 
     if (!res.ok) {
