@@ -52,6 +52,12 @@ export const boardToastDictionary = {
   'fail-invite-toast-title': 'Błąd podczas dołączania ☹️',
 };
 
+export const tokenDictionary = {
+  'token-is-required': 'Token jest wymagany.',
+  'token-is-invalid': 'Niepoprawny token.',
+  'token-is-expired': 'Token wygasł.',
+};
+
 // Tools
 export const arrowHeadLength = 10;
 export const bowingOptionValue = 2;
