@@ -78,7 +78,12 @@ const Board: React.FC<IBoardProps> = ({ params }) => {
         boardName='Mock Board'
         className={`absolute top-0 right-0 transition-transform ${isChatOpen ? 'translate-x-0' : 'translate-x-[20rem]'} ${isHidden ? 'hidden' : ''}`}
       />
-      <ToolMenu className={`absolute top-1/3 left-7 border-2 rounded ${isToolMenuOpen ? '' : 'hidden'}`} options={options} setOptions={setOptions} />
+      <ToolMenu
+        className={`absolute top-1/3 left-7 border-2 rounded ${isToolMenuOpen ? '' : 'hidden'}`}
+        options={options}
+        setOptions={setOptions}
+        selectedTool={tool}
+      />
       <BoardButton className='absolute bottom-7 left-7' alt='board-button' path='/board-button.svg' />
     </div>
   );
