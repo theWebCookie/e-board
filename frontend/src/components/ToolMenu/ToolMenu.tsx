@@ -1,15 +1,13 @@
-import { IOptions } from '@/app/board/[id]/page';
+import { IOptions, useBoard } from '@/app/board/[id]/page';
 import ToolMenuItem from './ToolMenuItem';
 import { useState } from 'react';
 
 interface ToolMenuProps {
   className: string;
-  options: IOptions;
-  setOptions: (options: IOptions) => void;
-  selectedTool: string;
 }
 
-const ToolMenu: React.FC<ToolMenuProps> = ({ className, options, setOptions, selectedTool }) => {
+const ToolMenu: React.FC<ToolMenuProps> = ({ className }) => {
+  const { tool } = useBoard();
   const [activeTools, setActiveTools] = useState({
     stroke: 'stroke-0',
     fill: 'fill-0',
@@ -19,9 +17,11 @@ const ToolMenu: React.FC<ToolMenuProps> = ({ className, options, setOptions, sel
     fontSize: 'fontSize-0',
   });
 
+  console.log('tool:', tool);
+
   const items = [
     {
-      text: selectedTool === 'arrow' || selectedTool === 'line' || selectedTool === 'pencil' || selectedTool === 'text' ? 'Kolor' : 'Obramowanie',
+      text: tool === 'arrow' || tool === 'line' || tool === 'pencil' || tool === 'text' ? 'Kolor' : 'Obramowanie',
       colors: ['#000000', '#ff0000', '#00ff00', '#0000ff'],
       name: 'stroke',
     },
@@ -54,7 +54,7 @@ const ToolMenu: React.FC<ToolMenuProps> = ({ className, options, setOptions, sel
       ],
       name: 'roughness',
     },
-    ...(selectedTool === 'text'
+    ...(tool === 'text'
       ? [
           {
             text: 'Rozmiar czcionki',
@@ -70,13 +70,13 @@ const ToolMenu: React.FC<ToolMenuProps> = ({ className, options, setOptions, sel
   ];
 
   const filteredItems = items.filter((item) => {
-    if (selectedTool === 'arrow' || selectedTool === 'pencil') {
+    if (tool === 'arrow' || tool === 'pencil') {
       return item.name === 'stroke';
-    } else if (selectedTool === 'text') {
+    } else if (tool === 'text') {
       return item.name === 'stroke' || item.name === 'fontSize';
-    } else if (selectedTool === 'line') {
+    } else if (tool === 'line') {
       return item.name !== 'fill';
-    } else if (selectedTool === 'image' || selectedTool === 'eraser') {
+    } else if (tool === 'image' || tool === 'eraser') {
       return false;
     }
     return true;
@@ -93,8 +93,6 @@ const ToolMenu: React.FC<ToolMenuProps> = ({ className, options, setOptions, sel
             colors={item.colors}
             name={item.name}
             opacity={item.value}
-            options={options}
-            setOptions={setOptions}
             activeTools={activeTools}
             setActiveTools={setActiveTools}
           />

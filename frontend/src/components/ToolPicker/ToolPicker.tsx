@@ -1,18 +1,16 @@
 'use client';
 import Tool from './Tool';
-import { ITool } from '@/app/board/[id]/page';
+import { useBoard } from '@/app/board/[id]/page';
 interface ToolPickerProps {
-  tools: ITool[];
-  activeTool: string | null;
-  setActiveTool: (toolType: string) => void;
   className?: string;
 }
 
-const ToolPicker: React.FC<ToolPickerProps> = ({ tools, activeTool, setActiveTool, className }) => {
+const ToolPicker: React.FC<ToolPickerProps> = ({ className }) => {
+  const { tools, tool } = useBoard();
   return (
     <div className={`flex flex-wrap gap-2.5 py-2.5 px-4 bg-white rounded-md shadow max-w-md my-4 m-auto ${className}`}>
-      {tools.map((tool, idx) => (
-        <Tool key={idx} icon={tool.icon} name={tool.name} active={activeTool === tool.type} toolType={tool.type} setActiveTool={setActiveTool} />
+      {tools.map((item, idx) => (
+        <Tool key={idx} icon={item.icon} name={item.name} active={tool === item.type} toolType={item.type} />
       ))}
     </div>
   );

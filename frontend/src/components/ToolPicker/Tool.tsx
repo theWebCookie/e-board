@@ -1,3 +1,4 @@
+import { useBoard } from '@/app/board/[id]/page';
 import Image from 'next/image';
 
 interface ToolProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -5,13 +6,13 @@ interface ToolProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   name: string;
   active: boolean;
   toolType: string;
-  setActiveTool: (tool: string) => void;
 }
 
-const Tool: React.FC<ToolProps> = ({ icon, name, active, toolType, setActiveTool }) => {
+const Tool: React.FC<ToolProps> = ({ icon, name, active, toolType }) => {
+  const { setTool } = useBoard();
   const handleToolClick = () => {
     if (!active) {
-      setActiveTool(toolType);
+      setTool(toolType);
     }
   };
 

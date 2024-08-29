@@ -1,4 +1,4 @@
-import { IOptions } from '@/app/board/[id]/page';
+import { IOptions, useBoard } from '@/app/board/[id]/page';
 import Image from 'next/image';
 import { ChangeEvent } from 'react';
 import { ActiveTools } from './ToolMenuItem';
@@ -10,16 +10,17 @@ interface MenuInputProps {
   name: string;
   value: string;
   id: string;
-  setOptions: (options: any) => void;
   setActiveTools: (activeTools: any) => void;
   activeTools: ActiveTools;
 }
 
-const MenuInput: React.FC<MenuInputProps> = ({ className, image, name, color, value, id, setOptions, setActiveTools, activeTools }) => {
+const MenuInput: React.FC<MenuInputProps> = ({ className, image, name, color, value, id, setActiveTools, activeTools }) => {
+  const { options, setOptions } = useBoard();
   const menuButtonStyles = `cursor-default appearance-auto pointer-events-none opacity-0 absolute mt-1 mr-1 ml-1 ${className}`;
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setOptions((prevOptions: IOptions) => ({ ...prevOptions, [name]: e.target.value }));
+    const updatedOptions = { ...options, [name]: e.target.value };
+    setOptions(updatedOptions);
     setActiveTools((prevActiveTools: ActiveTools) => ({ ...prevActiveTools, [name]: id }));
   };
 

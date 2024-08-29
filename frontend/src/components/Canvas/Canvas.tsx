@@ -1,4 +1,4 @@
-import { IOptions } from '@/app/board/[id]/page';
+import { useBoard } from '@/app/board/[id]/page';
 import useHistory from '@/components/Canvas/useHistory';
 import {
   adjustElementCoordinates,
@@ -18,14 +18,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import rough from 'roughjs';
 import usePressedKeys from './usePressedKeys';
 
-interface ICanvasProps {
-  setIsHidden: (isHidden: boolean) => void;
-  setTool: (tool: string) => void;
-  tool: string;
-  options: IOptions;
-}
-
-const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, setTool, tool, options }) => {
+const Canvas = () => {
+  const { setIsHidden, setTool, tool, options } = useBoard();
   const { state: elements, setState: setElements, undo, redo } = useHistory<IElement[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [selectedElement, setSelectedElement] = useState<IElement | null>(null);
