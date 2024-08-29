@@ -4,7 +4,7 @@ import { RoughCanvas } from 'roughjs/bin/canvas';
 import { Drawable } from 'roughjs/bin/core';
 import { Point } from 'roughjs/bin/geometry';
 import { IOptions } from './[id]/page';
-import { arrowHeadLength, arrowStrokeColor, bowingOptionValue } from '@config';
+import { arrowHeadLength, bowingOptionValue } from '@config';
 
 export interface IBaseElement {
   id: number;
@@ -14,6 +14,7 @@ export interface IBaseElement {
   x2: number;
   y2: number;
   position?: string | null;
+  newOptions: INewOptions;
   offsetX?: number;
   offsetY?: number;
 }
@@ -78,6 +79,7 @@ interface INewOptions {
   strokeWidth: number;
   fillStyle: string;
   strokeLineDash: number[];
+  fontSize: number;
 }
 
 const pencilStrokeOptions = {
@@ -105,6 +107,7 @@ const formatOptions = (options: IOptions): INewOptions => ({
   stroke: convertedColor(options.stroke, parseFloat(options.opacity)),
   strokeWidth: parseInt(options.strokeWidth),
   strokeLineDash: options.strokeLineDash === '' ? [] : options.strokeLineDash.split(',').map((x) => parseInt(x)),
+  fontSize: parseInt(options.fontSize),
 });
 
 const distance = (a: IPoint, b: IPoint) => Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
@@ -140,11 +143,11 @@ export const createElement = (
       if (!newOptions) throw new Error('Options are required');
       return { id, type, x1, y1, x2, y2, roughElement: generator.polygon(points as Point[], newOptions) } as IDiamondElement;
     case 'pencil':
-      return { id, type, points: [{ x: x1, y: y1 }] } as unknown as IPencilElement;
+      return { id, type, points: [{ x: x1, y: y1 }], newOptions } as unknown as IPencilElement;
     case 'arrow':
-      return { id, type, x1, y1, x2, y2 } as IArrowElement;
+      return { id, type, x1, y1, x2, y2, newOptions } as IArrowElement;
     case 'text':
-      return { id, type, x1, y1, x2, y2, text: '' } as ITextElement;
+      return { id, type, x1, y1, x2, y2, text: '', newOptions } as ITextElement;
     default:
       throw new Error(`Type not recognized: ${type}`);
   }
@@ -175,9 +178,13 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       break;
     case 'pencil':
       const stroke = getSvgPathFromStroke(getStroke(element.points, pencilStrokeOptions));
-      context.fill(new Path2D(stroke));
+      if (context instanceof CanvasRenderingContext2D) {
+        context.fillStyle = element.newOptions.stroke;
+        context.fill(new Path2D(stroke));
+      }
       break;
     case 'arrow':
+      const arrowStrokeColor = element.newOptions.stroke;
       const startX = element.x1;
       const startY = element.y1;
       const endX = element.x2;
@@ -199,7 +206,8 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
     case 'text':
       if (context instanceof CanvasRenderingContext2D) {
         context.textBaseline = 'top';
-        context.font = '24px Pacifico, cursive';
+        context.font = `${element.newOptions.fontSize}px Pacifico, cursive`;
+        context.fillStyle = element.newOptions.stroke;
         if (element.text) context.fillText(element.text, element.x1, element.y1);
       }
       break;
@@ -238,7 +246,7 @@ export const updateElement = (
       const textWidth = document.getElementById('canvas')!.getContext('2d').measureText(textOptions.text).width;
       const textHeight = 24;
       elementsCopy[id] = {
-        ...createElement(id, x1, y1, x1 + textWidth, y1 + textHeight, type),
+        ...createElement(id, x1, y1, x1 + textWidth, y1 + textHeight, type, options),
         text: textOptions.text,
       };
       break;

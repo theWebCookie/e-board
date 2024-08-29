@@ -81,7 +81,7 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, setTool, tool, options })
 
   useEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    console.log(canvas.toDataURL());
+    // console.log(canvas.toDataURL());
   }, [elements]);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, setTool, tool, options })
       const canvas = document.getElementById('canvas') as HTMLCanvasElement;
       const context = canvas.getContext('2d') as CanvasRenderingContext2D;
       context.drawImage(img, 0, 0);
-      console.log(canvas.toDataURL());
+      // console.log(canvas.toDataURL());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensions]);
@@ -277,7 +277,7 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, setTool, tool, options })
     const { id, x1, y1, type } = selectedElement as IElement;
     setAction('none');
     setSelectedElement(null);
-    updateElement(elements, id, x1, y1, null, null, type, { text: event.target.value }, null, setElements);
+    updateElement(elements, id, x1, y1, null, null, type, { text: event.target.value }, options, setElements);
   };
 
   const onZoom = (delta: number) => {
@@ -303,7 +303,8 @@ const Canvas: React.FC<ICanvasProps> = ({ setIsHidden, setTool, tool, options })
             position: 'fixed',
             top: selectedElement!.y1 * scale + panOffset.y * scale - scaleOffset.y,
             left: selectedElement!.x1 * scale + panOffset.x * scale - scaleOffset.x,
-            font: `${24 * scale}px Pacifico, cursive`,
+            font: `${parseInt(options.fontSize) * scale}px Pacifico, cursive`,
+            color: options.stroke,
             margin: 0,
             padding: 0,
             border: 0,

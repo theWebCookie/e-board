@@ -61,7 +61,6 @@ export const tokenDictionary = {
 // Tools
 export const arrowHeadLength = 10;
 export const bowingOptionValue = 2;
-export const arrowStrokeColor = 'black';
 export const defaultOptions = {
   roughness: '1.2',
   seed: '0',
@@ -70,4 +69,5 @@ export const defaultOptions = {
   strokeWidth: '2',
   strokeLineDash: '',
   opacity: '1',
+  fontSize: '12',
 };

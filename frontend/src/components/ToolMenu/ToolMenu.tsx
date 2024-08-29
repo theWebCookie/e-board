@@ -16,6 +16,7 @@ const ToolMenu: React.FC<ToolMenuProps> = ({ className, options, setOptions, sel
     strokeWidth: 'strokeWidth-0',
     strokeLineDash: 'strokeLineDash-0',
     roughness: 'roughness-0',
+    fontSize: 'fontSize-0',
   });
 
   const items = [
@@ -53,11 +54,24 @@ const ToolMenu: React.FC<ToolMenuProps> = ({ className, options, setOptions, sel
       ],
       name: 'roughness',
     },
+    ...(selectedTool === 'text'
+      ? [
+          {
+            text: 'Rozmiar czcionki',
+            buttons: [
+              { image: '/font_size.svg', value: '20' },
+              { image: '/font_size.svg', value: '24' },
+              { image: '/font_size.svg', value: '28' },
+            ],
+            name: 'fontSize',
+          },
+        ]
+      : []),
   ];
 
   const filteredItems = items.filter((item) => {
     if (selectedTool === 'arrow' || selectedTool === 'pencil') {
-      return item.name === 'stroke' || item.name === 'opacity';
+      return item.name === 'stroke';
     } else if (selectedTool === 'text') {
       return item.name === 'stroke' || item.name === 'fontSize';
     } else if (selectedTool === 'line') {

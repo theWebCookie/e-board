@@ -8,6 +8,7 @@ export interface ActiveTools extends Record<string, any> {
   strokeWidth: string;
   strokeLineDash: string;
   roughness: string;
+  fontSize: string;
 }
 
 interface ToolMenuItemProps {

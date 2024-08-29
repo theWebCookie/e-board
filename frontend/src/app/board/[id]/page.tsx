@@ -36,6 +36,7 @@ export interface IOptions {
   strokeWidth: string;
   strokeLineDash: string;
   opacity: string;
+  fontSize: string;
 }
 
 interface IBoardProps {

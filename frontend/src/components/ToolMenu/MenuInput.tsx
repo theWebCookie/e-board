@@ -24,10 +24,20 @@ const MenuInput: React.FC<MenuInputProps> = ({ className, image, name, color, va
   };
 
   if (image) {
+    let size = 20;
+
+    if (name === 'fontSize') {
+      size = parseInt(value, 10) - 4;
+    }
+
     return (
-      <label className={`cursor-pointer rounded-sm p-1 transition duration-300 ${activeTools[name] === id ? 'bg-[#e0dfff]' : 'bg-[#ececf4]'}`}>
+      <label
+        className={`cursor-pointer rounded-sm p-1 transition duration-300 flex justify-center ${
+          activeTools[name] === id ? 'bg-[#e0dfff]' : 'bg-[#ececf4]'
+        }`}
+      >
         <input type='radio' onChange={(e) => handleInputChange(e)} name={name} id={id} className={menuButtonStyles} value={value} />
-        <Image src={image} width='20' height='20' alt={name} />
+        <Image src={image} width={size} height={size} alt={name} />
       </label>
     );
   }
