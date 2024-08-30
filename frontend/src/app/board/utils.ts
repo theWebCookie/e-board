@@ -3,7 +3,7 @@ import rough from 'roughjs';
 import { RoughCanvas } from 'roughjs/bin/canvas';
 import { Drawable } from 'roughjs/bin/core';
 import { Point } from 'roughjs/bin/geometry';
-import { IOptions } from './[id]/page';
+import { IImageData, IOptions } from './[id]/page';
 import { arrowHeadLength, bowingOptionValue } from '@config';
 
 export interface IBaseElement {
@@ -56,12 +56,25 @@ export interface ITextElement extends IBaseElement {
   text: string;
 }
 
+export interface IImageElement extends IBaseElement {
+  typ: 'image';
+  imageData: IImageData;
+}
+
 export interface IEvent extends MouseEvent {
   clientX: number;
   clientY: number;
 }
 
-export type IElement = ILineElement | IRectangleElement | ICircleElement | IDiamondElement | IPencilElement | IArrowElement | ITextElement;
+export type IElement =
+  | ILineElement
+  | IRectangleElement
+  | ICircleElement
+  | IDiamondElement
+  | IPencilElement
+  | IArrowElement
+  | ITextElement
+  | IImageElement;
 
 export interface IPoint {
   x: number;
@@ -119,7 +132,8 @@ export const createElement = (
   x2: number,
   y2: number,
   type: string,
-  options: IOptions | null = null
+  options: IOptions | null = null,
+  imageData: IImageData | null = null
 ): IElement => {
   const newOptions = options ? formatOptions(options) : null;
 
@@ -148,6 +162,12 @@ export const createElement = (
       return { id, type, x1, y1, x2, y2, newOptions } as IArrowElement;
     case 'text':
       return { id, type, x1, y1, x2, y2, text: '', newOptions } as ITextElement;
+    case 'image':
+      console.log({ id, type, x1, y1, x2, y2, imageData });
+      if (!imageData) throw new Error('Image data is required');
+      const imgX = x1 + imageData.width / 2;
+      const imgY = y1 + imageData.height / 2;
+      return { id, type, x1: imgX - imageData.width / 2, y1: imgY - imageData.height / 2, x2, y2, imageData } as IImageElement;
     default:
       throw new Error(`Type not recognized: ${type}`);
   }
@@ -211,6 +231,13 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
         if (element.text) context.fillText(element.text, element.x1, element.y1);
       }
       break;
+    case 'image':
+      if (context instanceof CanvasRenderingContext2D) {
+        const img = new Image();
+        img.src = element.imageData.data;
+        context.drawImage(img, element.x1, element.y1, element.imageData.width, element.imageData.height);
+      }
+      break;
     default:
       throw new Error(`Type not recognized: ${element.type}`);
   }
@@ -226,7 +253,8 @@ export const updateElement = (
   type: string,
   textOptions = null,
   options = null,
-  setElements: (arg0: IElement[], arg1: boolean) => void
+  setElements: (arg0: IElement[], arg1: boolean) => void,
+  imageData: IImageData | null = null
 ) => {
   const elementsCopy: IElement[] = [...elements];
 
@@ -249,6 +277,14 @@ export const updateElement = (
         ...createElement(id, x1, y1, x1 + textWidth, y1 + textHeight, type, options),
         text: textOptions.text,
       };
+      break;
+    case 'image':
+      console.log({ ...elementsCopy[id], x1, y1, x2, y2, imageData });
+      if (imageData) {
+        elementsCopy[id] = { ...elementsCopy[id], x1, y1, x2, y2, imageData } as IImageElement;
+      } else {
+        elementsCopy[id] = { ...elementsCopy[id], x1, y1, x2, y2 } as IImageElement;
+      }
       break;
     default:
       throw new Error(`Type not recognized: ${type}`);
@@ -313,25 +349,14 @@ function positionWithElement(x: number, y: number, element: IElement) {
       const bottomRight = nearPoint(x, y, x2, y2, 'br');
       const insideRect = x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null;
       return topLeft || topRight || bottomLeft || bottomRight || insideRect;
-    case 'diamond':
-      const top = { x: x1 + (x2 - x1) / 2, y: y1 };
-      const right = { x: x2, y: y1 + (y2 - y1) / 2 };
-      const bottom = { x: x1 + (x2 - x1) / 2, y: y2 };
-      const left = { x: x1, y: y1 + (y2 - y1) / 2 };
-      const topVertex = nearPoint(x, y, top.x, top.y, 'top');
-      const rightVertex = nearPoint(x, y, right.x, right.y, 'right');
-      const bottomVertex = nearPoint(x, y, bottom.x, bottom.y, 'bottom');
-      const leftVertex = nearPoint(x, y, left.x, left.y, 'left');
-      const insideDiamond =
-        distance(top, { x, y }) + distance(right, { x, y }) + distance(bottom, { x, y }) + distance(left, { x, y }) <=
-        distance(top, right) + distance(right, bottom) + distance(bottom, left) + distance(left, top)
-          ? 'inside'
-          : false;
-      return topVertex || rightVertex || bottomVertex || leftVertex || insideDiamond;
     case 'circle':
       const center = { x: x1, y: y1 };
-      const radius = distance(center, { x: x2, y: y2 });
-      return distance(center, { x, y }) <= radius ? 'inside' : null;
+      const radiusX = Math.abs((x2 - x1) / 2);
+      const radiusY = Math.abs((y2 - y1) / 2);
+      const averageRadius = (radiusX + radiusY) / 2;
+      const distanceToCenter = distance(center, { x, y });
+      const insideEllipse = Math.pow(x - x1, 2) / Math.pow(radiusX, 2) + Math.pow(y - y1, 2) / Math.pow(radiusY, 2) <= 1;
+      return distanceToCenter <= averageRadius || insideEllipse ? 'inside' : null;
     case 'pencil':
       const betweenAnyPoint = element.points.some((point, index) => {
         const nextPoint = element.points[index + 1] as unknown as IPoint;
@@ -340,8 +365,9 @@ function positionWithElement(x: number, y: number, element: IElement) {
       });
       return betweenAnyPoint ? 'inside' : null;
     case 'arrow':
-      break;
+    case 'diamond':
     case 'text':
+    case 'image':
       return x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null;
     default:
       throw new Error(`Type not recognized: ${type}`);

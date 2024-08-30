@@ -19,7 +19,7 @@ import rough from 'roughjs';
 import usePressedKeys from './usePressedKeys';
 
 const Canvas = () => {
-  const { setIsHidden, setTool, tool, options } = useBoard();
+  const { setIsHidden, setTool, tool, options, imageData } = useBoard();
   const { state: elements, setState: setElements, undo, redo } = useHistory<IElement[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [selectedElement, setSelectedElement] = useState<IElement | null>(null);
@@ -31,6 +31,7 @@ const Canvas = () => {
   const [scaleOffset, setScaleOffset] = useState({ x: 0, y: 0 });
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const pressedKeys = usePressedKeys();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useLayoutEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -167,6 +168,25 @@ const Canvas = () => {
         }
       }
     } else {
+      if (tool === 'image' && imageData) {
+        console.log(imageData);
+        const imgWidth = imageData.width;
+        const imgHeight = imageData.height;
+        const centerX = clientX;
+        const centerY = clientY;
+
+        const x1 = centerX - imgWidth / 2;
+        const y1 = centerY - imgHeight / 2;
+        const x2 = x1 + imgWidth;
+        const y2 = y1 + imgHeight;
+
+        const id = elements.length;
+        const imageElement = createElement(id, x1, y1, x2, y2, 'image', null, imageData);
+        console.log(imageElement);
+        setElements((prevState) => [...prevState, imageElement]);
+        setSelectedElement(imageElement);
+        return;
+      }
       const id = elements.length;
       const element = createElement(id, clientX, clientY, clientX, clientY, tool, options);
       setElements((prevState) => [...prevState, element]);
@@ -194,6 +214,23 @@ const Canvas = () => {
     }
 
     target.style.cursor = cursorType;
+
+    if (action === 'moving' && selectedElement?.type === 'image') {
+      const { id, x1, y1, x2, y2 } = selectedElement;
+      const width = x2 - x1;
+      const height = y2 - y1;
+      const newX1 = clientX - (selectedElement.offsetX ?? 0);
+      const newY1 = clientY - (selectedElement.offsetY ?? 0);
+      updateElement(elements, id, newX1, newY1, newX1 + width, newY1 + height, 'image', null, options, setElements);
+      return;
+    }
+
+    if (action === 'resize' && selectedElement?.type === 'image') {
+      const { id, position } = selectedElement;
+      const { x1, y1, x2, y2 } = resizedCoordinates(clientX, clientY, position!, selectedElement);
+      updateElement(elements, id, x1, y1, x2, y2, 'image', null, options, setElements);
+      return;
+    }
 
     if (action === 'panning') {
       const deltaX = clientX - startPanMousePosition.x;
@@ -288,6 +325,7 @@ const Canvas = () => {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        ref={canvasRef}
       ></canvas>
       {action === 'writing' ? (
         <textarea

@@ -36,6 +36,14 @@ interface IBoardContext {
   options: IOptions;
   setOptions: (options: IOptions) => void;
   isToolMenuOpen: boolean;
+  imageData: IImageData;
+  setImageData: (x: IImageData) => void;
+}
+
+export interface IImageData {
+  width: number;
+  height: number;
+  data: string;
 }
 
 interface IBoardPageProps {
@@ -55,6 +63,8 @@ const defaultBoardContextValue: IBoardContext = {
   options: { ...defaultOptions, seed: Math.floor(Math.random() * 2 ** 31) },
   setOptions: () => {},
   isToolMenuOpen: false,
+  imageData: { width: 0, height: 0, data: '' },
+  setImageData: () => {},
 };
 
 const BoardContext = createContext<IBoardContext>(defaultBoardContextValue);
@@ -64,6 +74,7 @@ export const BoardProvider = ({ children }: { children: ReactNode }) => {
   const [isHidden, setIsHidden] = useState(true);
   const [options, setOptions] = useState<IOptions>({ ...defaultOptions, seed: Math.floor(Math.random() * 2 ** 31) });
   const isToolMenuOpen = tool !== 'pointer' && tool !== 'eraser' && tool !== 'image';
+  const [imageData, setImageData] = useState('');
 
   const tools: ITool[] = [
     { name: 'Wskaźnik', icon: '/pointer.svg', type: 'pointer' },
@@ -92,6 +103,8 @@ export const BoardProvider = ({ children }: { children: ReactNode }) => {
     options,
     setOptions,
     isToolMenuOpen,
+    imageData,
+    setImageData,
   };
 
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;
