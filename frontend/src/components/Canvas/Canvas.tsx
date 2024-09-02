@@ -32,6 +32,8 @@ const Canvas = () => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const pressedKeys = usePressedKeys();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [elementsToErase, setElementsToErase] = useState<Set<IElement>>(new Set());
+  const [erasePath, setErasePath] = useState<{ x: number; y: number }[]>([]);
 
   useLayoutEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -134,6 +136,14 @@ const Canvas = () => {
 
   const handleMouseDown: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
     if (action === 'writing') return;
+
+    if (tool === 'eraser') {
+      setAction('erasing');
+      setElementsToErase(new Set());
+      setErasePath([]);
+      return;
+    }
+
     const { clientX, clientY } = getMouseCoordinates(event, panOffset, scaleOffset, scale);
 
     if (event.button === 1 || pressedKeys.has(' ')) {
@@ -198,6 +208,37 @@ const Canvas = () => {
 
   const handleMouseMove: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
     const { clientX, clientY } = getMouseCoordinates(event, panOffset, scaleOffset, scale);
+
+    if (action === 'erasing') {
+      const updatedElementsToErase = new Set(elementsToErase);
+      const element = getElementAtPosition(clientX, clientY, elements);
+
+      if (element) {
+        updatedElementsToErase.add(element.id);
+      }
+
+      setElementsToErase(updatedElementsToErase);
+
+      const newPoint = { x: clientX, y: clientY };
+      setErasePath((prevPath) => [...prevPath.slice(-1), newPoint]);
+
+      if (!canvasRef.current) return;
+
+      const context = canvasRef.current.getContext('2d');
+
+      if (!context) return;
+
+      context.strokeStyle = '#c2c4c3';
+      context.lineWidth = 4;
+      context.beginPath();
+      if (erasePath.length > 0) {
+        const lastPoint = erasePath[0];
+        context.moveTo(lastPoint.x, lastPoint.y);
+      }
+      context.lineTo(newPoint.x, newPoint.y);
+      context.stroke();
+      return;
+    }
 
     const target = event.target as HTMLCanvasElement;
     let cursorType = 'default';
@@ -280,6 +321,14 @@ const Canvas = () => {
 
   const handleMouseUp: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
     const { clientX, clientY } = getMouseCoordinates(event, panOffset, scaleOffset, scale);
+
+    if (action === 'erasing') {
+      setElements((prevElements) => prevElements.filter((element) => !elementsToErase.has(element.id)));
+      setAction('none');
+      setErasePath([]);
+      return;
+    }
+
     if (selectedElement) {
       if (
         selectedElement.type === 'text' &&
