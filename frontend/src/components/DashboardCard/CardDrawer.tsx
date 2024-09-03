@@ -11,11 +11,13 @@ interface ICardDrawerProps {
     name: string;
     users: IUser[];
     inviteCode: string;
+    createdAt: Date;
+    updatedAt: Date;
   };
 }
 
 const CardDrawer: React.FC<ICardDrawerProps> = ({ children, boardInfo }) => {
-  const { name, users, inviteCode } = boardInfo;
+  const { name, users, inviteCode, createdAt, updatedAt } = boardInfo;
   const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
   return (
     <Drawer>
@@ -23,13 +25,11 @@ const CardDrawer: React.FC<ICardDrawerProps> = ({ children, boardInfo }) => {
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{capitalizedName}</DrawerTitle>
-          <CardDrawerDescription users={users} inviteCode={inviteCode} />
+          <CardDrawerDescription users={users} inviteCode={inviteCode} createdAt={createdAt} updatedAt={updatedAt} />
         </DrawerHeader>
         <DrawerFooter>
-          <DrawerClose>
-            <Button variant='ghost' className='absolute top-6 right-6'>
-              <Image src='/x.svg' alt='close' width={15} height={15} />
-            </Button>
+          <DrawerClose className='absolute top-6 right-6 w-4 h-4'>
+            <Image src='/x.svg' alt='close' width={15} height={15} className='w-full h-auto' />
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

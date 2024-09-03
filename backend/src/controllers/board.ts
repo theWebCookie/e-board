@@ -73,6 +73,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   const userId = (req.user as CustomJwtPayload).id;
   const boardId = uuidv4();
   const boardInviteCode = getInviteCode();
+  const currentDate = new Date();
 
   if (!name) {
     res.status(400).json({ error: 'Błędne dane!' });
@@ -84,7 +85,10 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       data: {
         id: boardId,
         name,
+        content: Buffer.from([]),
         authorId: parseInt(userId),
+        createdAt: currentDate,
+        updatedAt: currentDate,
       },
     });
 

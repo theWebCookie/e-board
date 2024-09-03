@@ -9,14 +9,14 @@ import { MouseEvent } from 'react';
 interface ICardDrawerDescriptionProps {
   users: IUser[];
   inviteCode: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // TODO:
-// - Display date from API
 // - Display chart of elapsed time on board from API
-// - Display modified date from API
 
-const CardDrawerDescription: React.FC<ICardDrawerDescriptionProps> = ({ users, inviteCode }) => {
+const CardDrawerDescription: React.FC<ICardDrawerDescriptionProps> = ({ users, inviteCode, createdAt, updatedAt }) => {
   const handleCopy = (event: MouseEvent<HTMLSpanElement>) => {
     const spanElement = event.currentTarget as HTMLSpanElement;
     const textToCopy = spanElement.textContent || '';
@@ -27,12 +27,21 @@ const CardDrawerDescription: React.FC<ICardDrawerDescriptionProps> = ({ users, i
       duration: toastTimeout,
     });
   };
+
+  const formatDate = (date: Date): string => {
+    const dateToFormat = new Date(date);
+    const timePart = dateToFormat.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const datePart = dateToFormat.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    return `${timePart} ${datePart}`;
+  };
+
   return (
     <>
       <TooltipProvider>
         <DrawerDescription className='flex gap-3'>
-          <span>Utworzono 18:45 24/01/2024</span>
-          <span>Ostatnia modyfikacja 14:01 25/01/2024</span>
+          <span>Utworzono {formatDate(createdAt)}</span>
+          <span>Ostatnia modyfikacja {formatDate(updatedAt)}</span>
         </DrawerDescription>
         <Separator />
         <div>
