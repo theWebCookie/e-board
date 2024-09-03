@@ -20,17 +20,20 @@ model User {
   hashed_password String @unique
 
   boards UsersOnBoards[]
+  messages Message[]
 }
 
 model Board {
   id String @id
   name String
-  // content Bytes @db.ByteA
+  content Bytes @db.ByteA
   authorId Int
+  createdAt DateTime
+  updatedAt DateTime
 
   users UsersOnBoards[]
-  chat Chat[]
   boardInvite BoardInvite[]
+  messages Message[]
 }
 
 model UsersOnBoards {
@@ -55,15 +58,9 @@ model Message {
   id Int @id @default(autoincrement())
   message String
   userId Int
+  boardId   String
+  sentAt DateTime
 
-  Chat Chat[]
-}
-
-model Chat {
-  id Int @id @default(autoincrement())
-  content String
-  boardId String
-
+  user User @relation(fields: [userId], references: [id])
   board Board @relation(fields: [boardId], references: [id])
-  messages Message[]
 }
