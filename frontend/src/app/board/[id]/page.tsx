@@ -74,7 +74,7 @@ export const BoardProvider = ({ children }: { children: ReactNode }) => {
   const [isHidden, setIsHidden] = useState(true);
   const [options, setOptions] = useState<IOptions>({ ...defaultOptions, seed: null });
   const isToolMenuOpen = tool !== 'pointer' && tool !== 'eraser' && tool !== 'image';
-  const [imageData, setImageData] = useState('');
+  const [imageData, setImageData] = useState<IImageData>({ width: 0, height: 0, data: '' });
 
   useEffect(() => {
     setOptions((prevOptions) => ({ ...prevOptions, seed: Math.floor(Math.random() * 2 ** 31) }));
