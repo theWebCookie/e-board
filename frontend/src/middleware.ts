@@ -65,5 +65,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/home', request.url));
   }
 
+  if (authenticated) {
+    return NextResponse.next();
+  }
+
   return NextResponse.next();
 }

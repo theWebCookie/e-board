@@ -69,28 +69,6 @@ const ToolMenuItem: React.FC<ToolMenuItemProps> = ({ text, buttons, colors, name
               activeTools={activeTools}
             />
           ))}
-          {name === 'fill' && (
-            <input
-              type='color'
-              className='cursor-pointer size-7 border-0 bg-transparent'
-              value={options.fill}
-              onChange={(e) => {
-                const updatedOptions: IOptions = { ...options, [name]: e.target.value };
-                setOptions(updatedOptions);
-              }}
-            />
-          )}
-          {name === 'stroke' && (
-            <input
-              type='color'
-              className='cursor-pointer size-7 border-0 bg-transparent'
-              value={options.stroke}
-              onChange={(e) => {
-                const updatedOptions: IOptions = { ...options, [name]: e.target.value };
-                setOptions(updatedOptions);
-              }}
-            />
-          )}
         </div>
       </li>
     );

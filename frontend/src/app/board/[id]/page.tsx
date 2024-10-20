@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback, createContext, useContext, ReactNode } from 'react';
+import { useState, useCallback, createContext, useContext, ReactNode, useEffect } from 'react';
 import Arrow from '@/components/Arrow/Arrow';
 import BoardButton from '@/components/BoardButton/BoardButton';
 import ToolPicker from '@/components/ToolPicker/ToolPicker';
@@ -17,7 +17,7 @@ export interface ITool {
 
 export interface IOptions {
   roughness: string;
-  seed: number;
+  seed: number | null;
   fill: string;
   stroke: string;
   strokeWidth: string;
@@ -72,9 +72,13 @@ const BoardContext = createContext<IBoardContext>(defaultBoardContextValue);
 export const BoardProvider = ({ children }: { children: ReactNode }) => {
   const [tool, setTool] = useState('pointer');
   const [isHidden, setIsHidden] = useState(true);
-  const [options, setOptions] = useState<IOptions>({ ...defaultOptions, seed: Math.floor(Math.random() * 2 ** 31) });
+  const [options, setOptions] = useState<IOptions>({ ...defaultOptions, seed: null });
   const isToolMenuOpen = tool !== 'pointer' && tool !== 'eraser' && tool !== 'image';
   const [imageData, setImageData] = useState('');
+
+  useEffect(() => {
+    setOptions((prevOptions) => ({ ...prevOptions, seed: Math.floor(Math.random() * 2 ** 31) }));
+  }, [setOptions]);
 
   const tools: ITool[] = [
     { name: 'Wskaźnik', icon: '/pointer.svg', type: 'pointer' },
@@ -120,6 +124,7 @@ const Board: React.FC<IBoardProps> = ({ id }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const router = useRouter();
   const handleGoBack = useCallback(() => router.back(), [router]);
+
   const handleChatOpen = () => {
     setIsChatOpen(!isChatOpen);
   };
