@@ -2,7 +2,7 @@ import getStroke from 'perfect-freehand';
 import rough from 'roughjs';
 import { RoughCanvas } from 'roughjs/bin/canvas';
 import { Drawable } from 'roughjs/bin/core';
-import { Point } from 'roughjs/bin/geometry';
+import { Point as RoughPoint } from 'roughjs/bin/geometry';
 import { IImageData, IOptions } from './[id]/page';
 import { arrowHeadLength, bowingOptionValue } from '@config';
 
@@ -17,6 +17,11 @@ export interface IBaseElement {
   newOptions: INewOptions;
   offsetX?: number;
   offsetY?: number;
+}
+
+export interface Point {
+  x: number;
+  y: number;
 }
 
 export interface ILineElement extends IBaseElement {
@@ -115,7 +120,7 @@ const formatOptions = (options: IOptions): INewOptions => ({
   bowing: bowingOptionValue,
   fillStyle: 'solid',
   roughness: parseFloat(options.roughness),
-  seed: options.seed,
+  seed: options.seed ?? 0,
   fill: options.fill === 'transparent' ? 'rgba(0,0,0,0)' : convertedColor(options.fill, parseFloat(options.opacity)),
   stroke: convertedColor(options.stroke, parseFloat(options.opacity)),
   strokeWidth: parseInt(options.strokeWidth),
@@ -155,7 +160,7 @@ export const createElement = (
         [x1 + (x2 - x1) / 2, y2],
       ];
       if (!newOptions) throw new Error('Options are required');
-      return { id, type, x1, y1, x2, y2, roughElement: generator.polygon(points as Point[], newOptions) } as IDiamondElement;
+      return { id, type, x1, y1, x2, y2, roughElement: generator.polygon(points as RoughPoint[], newOptions) } as IDiamondElement;
     case 'pencil':
       return { id, type, points: [{ x: x1, y: y1 }], newOptions } as unknown as IPencilElement;
     case 'arrow':
@@ -194,10 +199,12 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
     case 'rectangle':
     case 'diamond':
     case 'circle':
-      roughCanvas.draw(element.roughElement);
+      if ('roughElement' in element) {
+        roughCanvas.draw(element.roughElement);
+      }
       break;
     case 'pencil':
-      const stroke = getSvgPathFromStroke(getStroke(element.points, pencilStrokeOptions));
+      const stroke = getSvgPathFromStroke(getStroke((element as IPencilElement).points, pencilStrokeOptions));
       if (context instanceof CanvasRenderingContext2D) {
         context.fillStyle = element.newOptions.stroke;
         context.fill(new Path2D(stroke));
@@ -228,7 +235,7 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
         context.textBaseline = 'top';
         context.font = `${element.newOptions.fontSize}px Pacifico, cursive`;
         context.fillStyle = element.newOptions.stroke;
-        if (element.text) context.fillText(element.text, element.x1, element.y1);
+        if ('text' in element && element.text) context.fillText(element.text, element.x1, element.y1);
       }
       break;
     case 'image':
@@ -248,11 +255,11 @@ export const updateElement = (
   id: number,
   x1: number,
   y1: number,
-  x2: number,
-  y2: number,
+  x2: number | null,
+  y2: number | null,
   type: string,
-  textOptions = null,
-  options = null,
+  textOptions: { text?: string } | null = null,
+  options: IOptions | null = null,
   setElements: (arg0: IElement[], arg1: boolean) => void,
   imageData: IImageData | null = null
 ) => {
@@ -264,18 +271,23 @@ export const updateElement = (
     case 'diamond':
     case 'rectangle':
     case 'arrow':
+      if (x2 === null || y2 === null) {
+        throw new Error('x2 and y2 cannot be null for this element type');
+      }
       elementsCopy[id] = createElement(id, x1, y1, x2, y2, type, options);
       break;
     case 'pencil':
-      (elementsCopy[id] as IPencilElement).points = [...(elementsCopy[id] as IPencilElement).points, { x: x2, y: y2 }];
+      if (x2 !== null && y2 !== null) {
+        (elementsCopy[id] as IPencilElement).points = [...(elementsCopy[id] as IPencilElement).points, { x: x2, y: y2 }];
+      }
       break;
     case 'text':
       // @ts-ignore
       const textWidth = document.getElementById('canvas')!.getContext('2d').measureText(textOptions.text).width;
       const textHeight = 24;
       elementsCopy[id] = {
-        ...createElement(id, x1, y1, x1 + textWidth, y1 + textHeight, type, options),
-        text: textOptions.text,
+        ...(createElement(id, x1, y1, x1 + textWidth, y1 + textHeight, type, options) as ITextElement),
+        text: textOptions?.text ?? '',
       };
       break;
     case 'image':
@@ -358,8 +370,8 @@ function positionWithElement(x: number, y: number, element: IElement) {
       const insideEllipse = Math.pow(x - x1, 2) / Math.pow(radiusX, 2) + Math.pow(y - y1, 2) / Math.pow(radiusY, 2) <= 1;
       return distanceToCenter <= averageRadius || insideEllipse ? 'inside' : null;
     case 'pencil':
-      const betweenAnyPoint = element.points.some((point, index) => {
-        const nextPoint = element.points[index + 1] as unknown as IPoint;
+      const betweenAnyPoint = (element as IPencilElement).points.some((point, index) => {
+        const nextPoint = (element as IPencilElement).points[index + 1] as unknown as IPoint;
         if (!nextPoint) return false;
         return onLine(point.x, point.y, nextPoint.x, nextPoint.y, x, y, 5) != null;
       });

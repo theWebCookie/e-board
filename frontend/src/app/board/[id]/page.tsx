@@ -119,7 +119,6 @@ export const useBoard = () => {
 };
 
 const Board: React.FC<IBoardProps> = ({ id }) => {
-  console.log('Board id:', id);
   const { isHidden, isToolMenuOpen } = useBoard();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const router = useRouter();
@@ -145,6 +144,7 @@ const Board: React.FC<IBoardProps> = ({ id }) => {
       <Chat
         boardName='Mock Board'
         className={`absolute top-0 right-0 transition-transform ${isChatOpen ? 'translate-x-0' : 'translate-x-[20rem]'} ${isHidden ? 'hidden' : ''}`}
+        boardId={id}
       />
       <ToolMenu className={`absolute top-1/3 left-7 border-2 rounded ${isToolMenuOpen ? '' : 'hidden'}`} />
       <BoardButton className='absolute bottom-7 left-7' alt='board-button' path='/board-button.svg' />

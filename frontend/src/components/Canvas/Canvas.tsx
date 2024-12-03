@@ -32,7 +32,7 @@ const Canvas = () => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const pressedKeys = usePressedKeys();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [elementsToErase, setElementsToErase] = useState<Set<IElement>>(new Set());
+  const [elementsToErase, setElementsToErase] = useState<Set<IElement | number>>(new Set());
   const [erasePath, setErasePath] = useState<{ x: number; y: number }[]>([]);
 
   useLayoutEffect(() => {
@@ -297,7 +297,7 @@ const Canvas = () => {
         }));
         const elementsCopy = [...elements];
         elementsCopy[pencilElement.id] = {
-          ...elementsCopy[pencilElement.id],
+          ...(elementsCopy[pencilElement.id] as IPencilElement),
           points: newPoints,
         };
         setElements(elementsCopy, true);
@@ -314,7 +314,7 @@ const Canvas = () => {
     } else if (action === 'resize') {
       if (!selectedElement) return;
       const { id, type, position, ...coordinates } = selectedElement;
-      const { x1, y1, x2, y2 } = resizedCoordinates(clientX, clientY, position, coordinates);
+      const { x1, y1, x2, y2 } = resizedCoordinates(clientX, clientY, position ?? undefined, coordinates);
       updateElement(elements, id, x1, y1, x2, y2, type, null, options, setElements);
     }
   };
@@ -332,8 +332,8 @@ const Canvas = () => {
     if (selectedElement) {
       if (
         selectedElement.type === 'text' &&
-        clientX - (selectedElement as ITextElement).offsetX === selectedElement.x1 &&
-        clientY - (selectedElement as ITextElement).offsetY === selectedElement.y1
+        clientX - ((selectedElement as ITextElement).offsetX ?? 0) === selectedElement.x1 &&
+        clientY - ((selectedElement as ITextElement).offsetY ?? 0) === selectedElement.y1
       ) {
         setAction('writing');
         return;
@@ -390,7 +390,7 @@ const Canvas = () => {
             padding: 0,
             border: 0,
             outline: 0,
-            resize: 'auto',
+            resize: 'both',
             overflow: 'hidden',
             whiteSpace: 'pre',
             background: 'transparent',
