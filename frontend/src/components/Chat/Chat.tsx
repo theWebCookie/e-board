@@ -1,21 +1,25 @@
 'use client';
-import { useState } from 'react';
 import { Button } from '../ui/button';
 import Image from 'next/image';
 import { Form, FormField, FormControl, FormItem, FormMessage } from '../ui/form';
 import { Separator } from '../ui/separator';
 import Messages from './Messages';
-import { useWebSocket } from './useWebSocket';
 import chatFormSchema from './schema';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Textarea } from '../ui/textarea';
 import { ScrollArea } from '../ui/scroll-area';
+import { useWebSocket } from '@/app/home/page';
 
 interface IChatProps {
+  ws: WebSocket | null;
+  sendMessage: (message: any) => void;
+  messages: IMessage[];
+  clientId: string | null;
   boardName: string;
   className: string;
+  roomId: string;
 }
 
 export interface IMessage {
@@ -23,10 +27,8 @@ export interface IMessage {
   clientId: string;
 }
 
-const Chat: React.FC<IChatProps> = ({ boardName, className }) => {
-  const [messages, setMessages] = useState<IMessage[]>([]);
-  const [clientId, setClientId] = useState<string | null>(null);
-
+const Chat: React.FC<IChatProps> = ({ messages, clientId, boardName, className, roomId }) => {
+  const { ws, sendMessage } = useWebSocket();
   const form = useForm<z.infer<typeof chatFormSchema>>({
     resolver: zodResolver(chatFormSchema),
     defaultValues: {
@@ -36,20 +38,11 @@ const Chat: React.FC<IChatProps> = ({ boardName, className }) => {
 
   const messageValue = form.watch('message');
 
-  const ws = useWebSocket('ws://localhost:8080', {
-    onMessage: (data) => {
-      if (data.type === 'client-id') {
-        setClientId(data.clientId);
-      } else {
-        setMessages((prevMessages) => [...prevMessages, { message: data.message, clientId: data.clientId }]);
-      }
-    },
-  });
-
   const onSubmit = async (values: z.infer<typeof chatFormSchema>) => {
     if (ws && clientId) {
-      const messageData = { message: values.message, clientId };
-      ws.send(JSON.stringify(messageData));
+      const messageData = { type: 'message', message: values.message, clientId, roomId };
+      console.log(messageData);
+      sendMessage(messageData);
       form.setValue('message', '', { shouldValidate: false });
     }
   };
