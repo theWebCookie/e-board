@@ -1,4 +1,4 @@
-import { IBoardWithUsers } from '@/app/home/page';
+import { IBoardWithUsers, useWebSocket } from '@/app/home/page';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import Link from 'next/link';
@@ -15,6 +15,12 @@ interface IDashboardCardProps {
 
 const DashboardCard: React.FC<IDashboardCardProps> = ({ board }) => {
   const { id, name, users } = board;
+  const { sendMessage } = useWebSocket();
+
+  const handleJoinRoom = () => {
+    sendMessage({ type: 'join-room', roomId: id });
+  };
+
   return (
     <Card className='max-w-xs w-80 relative'>
       <div className='absolute top-6 right-6'>
@@ -45,7 +51,7 @@ const DashboardCard: React.FC<IDashboardCardProps> = ({ board }) => {
           ))}
         </div>
         <div>
-          <Button className='py-1 flex items-center'>
+          <Button className='py-1 flex items-center' onClick={handleJoinRoom}>
             <Link href={`/board/${id}`}>Wejdź</Link>
           </Button>
         </div>

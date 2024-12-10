@@ -18,7 +18,15 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import rough from 'roughjs';
 import usePressedKeys from './usePressedKeys';
 
-const Canvas = () => {
+interface CanvasProps {
+  ws: WebSocket | null;
+  sendMessage: (message: any) => void;
+  receivedElements: IElement[];
+  roomId: string;
+  clientId: string | null;
+}
+
+const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, roomId, clientId }) => {
   const { setIsHidden, setTool, tool, options, imageData } = useBoard();
   const { state: elements, setState: setElements, undo, redo } = useHistory<IElement[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -56,14 +64,13 @@ const Canvas = () => {
     context.translate(panOffset.x * scale - scaleOffsetX, panOffset.y * scale - scaleOffsetY);
     context.scale(scale, scale);
 
-    elements.forEach((element: IElement) => {
-      if (action === 'writing' && selectedElement!.id === element.id) return;
+    receivedElements.forEach((element) => {
       drawElement(roughCanvas, context, element);
     });
     context.restore();
+
     setIsHidden(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elements, action, selectedElement, panOffset, scale]);
+  }, [elements, receivedElements, action, selectedElement, panOffset, scale, setIsHidden]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -76,10 +83,7 @@ const Canvas = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    // console.log(canvas.toDataURL());
-  }, [elements]);
+  console.log(receivedElements);
 
   useEffect(() => {
     const undoRedoFunction = (event: React.KeyboardEvent) => {
@@ -111,10 +115,25 @@ const Canvas = () => {
       const canvas = document.getElementById('canvas') as HTMLCanvasElement;
       const context = canvas.getContext('2d') as CanvasRenderingContext2D;
       context.drawImage(img, 0, 0);
-      // console.log(canvas.toDataURL());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensions]);
+
+  useEffect(() => {
+    const sendCanvasData = () => {
+      if (ws && ws.readyState === ws.OPEN) {
+        const canvasData = {
+          type: 'canvas',
+          elements: JSON.stringify(elements),
+          clientId,
+          roomId,
+        };
+        console.log('elements z funkcji', elements);
+        sendMessage(canvasData);
+      }
+    };
+    sendCanvasData();
+  }, [elements, sendMessage, ws, clientId, roomId]);
 
   useEffect(() => {
     const panOrZoomFunction = (event: WheelEvent) => {
