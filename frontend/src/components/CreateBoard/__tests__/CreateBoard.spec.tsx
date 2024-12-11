@@ -21,14 +21,14 @@ global.fetch = jest.fn(
 describe('CreateBoard', () => {
   it('should open create board dialog', async () => {
     render(<CreateBoard />);
-    const createButton = screen.findByAltText('add button');
+    const createButton = screen.getByRole('button', { name: /Nowa tablica/i });
     fireEvent.click(await createButton);
     expect(screen.getByText('Stwórz tablicę')).toBeInTheDocument();
   });
 
   it('should show error message when create board form is empty', async () => {
     render(<CreateBoard />);
-    const createButton = screen.findByAltText('add button');
+    const createButton = screen.getByRole('button', { name: /Nowa tablica/i });
     fireEvent.click(await createButton);
     const submitButton = screen.getByText('Stwórz');
     fireEvent.click(submitButton);

@@ -1,9 +1,10 @@
 'use client';
-import InteractiveSections from '@/components/InteractiveSections/InteractiveSections';
+import CreateBoard from '@/components/CreateBoard/CreateBoard';
 import InviteCodeForm from '@/components/InviteCodeForm/InviteCodeForm';
 import LayoutWithNav from '@/components/LayoutWithNav/LayoutWithNav';
-import { Separator } from '@/components/ui/separator';
+import { MainLayout } from '@/components/MainLayout/MainLayout';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { BoardList } from '@/components/Board/BoardList';
 
 export interface IUser {
   name: string;
@@ -84,9 +85,10 @@ const Home = () => {
   return (
     <WebSocketProvider>
       <LayoutWithNav>
-        <InviteCodeForm />
-        <Separator />
-        <InteractiveSections />
+        <MainLayout title='Tablice' isButtonVisible buttonComponent={<CreateBoard />}>
+          <InviteCodeForm />
+          <BoardList />
+        </MainLayout>
       </LayoutWithNav>
     </WebSocketProvider>
   );

@@ -1,4 +1,5 @@
-import Nav from '../Nav/Nav';
+import { SidebarProvider, SidebarTrigger } from '../ui/sidebar';
+import { AppSidebar } from './AppSidebar';
 
 interface LayoutWithNavProps {
   children: React.ReactNode;
@@ -6,10 +7,15 @@ interface LayoutWithNavProps {
 
 const LayoutWithNav: React.FC<LayoutWithNavProps> = ({ children }) => {
   return (
-    <div>
-      <Nav />
-      <main className='p-4'>{children}</main>
-    </div>
+    <>
+      <SidebarProvider>
+        <AppSidebar />
+        <main className='w-full p-4'>
+          <SidebarTrigger />
+          {children}
+        </main>
+      </SidebarProvider>
+    </>
   );
 };
 

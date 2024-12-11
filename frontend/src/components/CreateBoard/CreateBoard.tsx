@@ -10,10 +10,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Toaster } from '../ui/toaster';
 import { useToast } from '../ui/use-toast';
 import { createBoardSchema } from './schema';
-import Image from 'next/image';
 import { boardToastDictionary, toastTimeout } from '@config';
 import { useRouter } from 'next/navigation';
-import { getCookie, getCookies } from '@/lib/cookies';
+import { getCookie } from '@/lib/cookies';
+import { PlusIcon } from 'lucide-react';
 
 const CreateBoard = () => {
   const form = useForm<z.infer<typeof createBoardSchema>>({
@@ -72,50 +72,48 @@ const CreateBoard = () => {
   const { toast } = useToast();
 
   return (
-    <div className='max-w-2xl h-60 flex justify-center items-center bg-slate-200 rounded-lg hover:hover:bg-slate-300 pointer transition duration-300'>
-      <Dialog>
-        <DialogTrigger asChild>
-          <div className='bg-slate-300 size-20 flex items-center justify-center rounded-full hover:bg-slate-500'>
-            <Image src='/circle-plus.svg' alt='add button' width={60} height={60} />
-          </div>
-        </DialogTrigger>
-        <DialogContent className='sm:max-w-md'>
-          <DialogHeader>
-            <DialogTitle>Stwórz tablicę</DialogTitle>
-            <DialogDescription>Ktokolwiek kto ma link może dołączyc do twojej tablicy.</DialogDescription>
-          </DialogHeader>
-          <div>
-            <Label htmlFor='name' className='sr-only'>
-              Nazwa
-            </Label>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className='flex items-center gap-2'>
-                <div className='flex gap-2'>
-                  <FormField
-                    control={form.control}
-                    name='boardName'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input placeholder='Nazwa' type='text' {...field} className='' />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <DialogFooter className='sm:justify-start'>
-                    <Button type='submit' onClick={handleBoardCreate}>
-                      Stwórz
-                    </Button>
-                  </DialogFooter>
-                </div>
-              </form>
-            </Form>
-          </div>
-        </DialogContent>
-        <Toaster />
-      </Dialog>
-    </div>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>
+          <PlusIcon /> Nowa tablica
+        </Button>
+      </DialogTrigger>
+      <DialogContent className='sm:max-w-md'>
+        <DialogHeader>
+          <DialogTitle>Stwórz tablicę</DialogTitle>
+          <DialogDescription>Ktokolwiek kto ma link może dołączyc do twojej tablicy.</DialogDescription>
+        </DialogHeader>
+        <div>
+          <Label htmlFor='name' className='sr-only'>
+            Nazwa
+          </Label>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className='flex items-center gap-2'>
+              <div className='flex gap-2'>
+                <FormField
+                  control={form.control}
+                  name='boardName'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder='Nazwa' type='text' {...field} className='' />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter className='sm:justify-start'>
+                  <Button type='submit' onClick={handleBoardCreate}>
+                    Stwórz
+                  </Button>
+                </DialogFooter>
+              </div>
+            </form>
+          </Form>
+        </div>
+      </DialogContent>
+      <Toaster />
+    </Dialog>
   );
 };
 

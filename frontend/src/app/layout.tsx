@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import './globals.css';
+import { ThemeProvider } from '@/components/Theme/theme-provider';
 
 const font = Poppins({ weight: ['400'], subsets: ['latin'] });
 
@@ -15,8 +16,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='pl'>
-      <body className={font.className}>{children}</body>
+    <html lang='pl' suppressHydrationWarning>
+      <body className={font.className}>
+        <ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
