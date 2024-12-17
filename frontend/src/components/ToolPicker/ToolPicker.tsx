@@ -1,6 +1,6 @@
 'use client';
+import { useBoard } from '../Board/BoardProvider';
 import Tool from './Tool';
-import { useBoard } from '@/app/board/[id]/page';
 interface ToolPickerProps {
   className?: string;
 }

@@ -1,7 +1,7 @@
-import { IOptions, useBoard } from '@/app/board/[id]/page';
 import Image from 'next/image';
 import { ChangeEvent } from 'react';
 import { ActiveTools } from './ToolMenuItem';
+import { useBoard } from '../Board/BoardProvider';
 
 interface MenuInputProps {
   className?: string;

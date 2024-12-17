@@ -1,4 +1,3 @@
-import { useBoard } from '@/app/board/[id]/page';
 import useHistory from '@/components/Canvas/useHistory';
 import {
   adjustElementCoordinates,
@@ -17,6 +16,7 @@ import {
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import rough from 'roughjs';
 import usePressedKeys from './usePressedKeys';
+import { useBoard } from '../Board/BoardProvider';
 
 interface CanvasProps {
   ws: WebSocket | null;
@@ -83,8 +83,6 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  console.log(receivedElements);
-
   useEffect(() => {
     const undoRedoFunction = (event: React.KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'z') undo();
@@ -120,7 +118,7 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
   }, [dimensions]);
 
   useEffect(() => {
-    const sendCanvasData = () => {
+    const sendCanvasData = async () => {
       if (ws && ws.readyState === ws.OPEN) {
         const canvasData = {
           type: 'canvas',
@@ -128,7 +126,6 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
           clientId,
           roomId,
         };
-        console.log('elements z funkcji', elements);
         sendMessage(canvasData);
       }
     };
@@ -198,7 +195,6 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
       }
     } else {
       if (tool === 'image' && imageData) {
-        console.log(imageData);
         const imgWidth = imageData.width;
         const imgHeight = imageData.height;
         const centerX = clientX;
@@ -211,7 +207,6 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
 
         const id = elements.length;
         const imageElement = createElement(id, x1, y1, x2, y2, 'image', null, imageData);
-        console.log(imageElement);
         setElements((prevState) => [...prevState, imageElement]);
         setSelectedElement(imageElement);
         return;

@@ -1,6 +1,6 @@
-import { useBoard } from '@/app/board/[id]/page';
 import Image from 'next/image';
 import { ChangeEvent, useRef } from 'react';
+import { useBoard } from '../Board/BoardProvider';
 
 interface ToolProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon: string;

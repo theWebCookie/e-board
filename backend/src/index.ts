@@ -1,19 +1,37 @@
 import { createServer } from 'http';
 import staticHandler from 'serve-handler';
 import ws, { WebSocketServer } from 'ws';
-import { v4 as uuidv4 } from 'uuid';
+import cookie from 'cookie';
+import jwt from 'jsonwebtoken';
+import config from 'config';
+import { IAppConfig } from './app';
 
 const server = createServer((req, res) => {
   return staticHandler(req, res, { public: 'public' });
 });
 
-const wss = new WebSocketServer({ server });
+const appConfig = config.get<IAppConfig>('app');
+
+export const wss = new WebSocketServer({ server });
 
 const rooms: { [key: string]: ws.WebSocket[] } = {};
 let canvasImage: string | null = null;
+export const clientUserMap: Map<ws.WebSocket, string> = new Map();
 
-wss.on('connection', (client) => {
-  const clientId = uuidv4();
+wss.on('connection', (client, req) => {
+  const cookies = cookie.parse(req.headers.cookie || '');
+  const token = cookies.token;
+
+  if (!token) {
+    console.error('No token found in cookies, closing connection.');
+    client.close();
+    return;
+  }
+
+  const decoded: any = jwt.verify(token, appConfig.jwtSecret);
+  const clientId = decoded.id;
+  clientUserMap.set(client, clientId);
+
   let currentRoom: string | null = null;
 
   client.send(JSON.stringify({ type: 'client-id', clientId }));
@@ -69,6 +87,7 @@ wss.on('connection', (client) => {
       rooms[currentRoom] = rooms[currentRoom].filter((c) => c !== client);
       console.log(`Client ${clientId} left room: ${currentRoom}`);
     }
+    clientUserMap.delete(client);
   });
 });
 

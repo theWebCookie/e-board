@@ -15,18 +15,27 @@ export const NotificationList = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Mock api call
     const fetchNotifications = async () => {
       setIsLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const mockNotifications: Notification[] = [
-        { id: 1, title: 'Zaproszenie do tablicy', author: 'Jan Kowalski' },
-        { id: 2, title: 'Spotkanie zespołu', author: 'Anna Nowak' },
-      ];
-      setNotifications(mockNotifications);
-      setIsLoading(false);
-    };
+      try {
+        const response = await fetch('/api/notification', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+        setNotifications(data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error(error);
+      }
+    };
     fetchNotifications();
   }, []);
 

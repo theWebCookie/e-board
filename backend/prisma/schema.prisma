@@ -21,6 +21,8 @@ model User {
 
   boards UsersOnBoards[]
   messages Message[]
+
+  Notification Notification[]
 }
 
 model Board {
@@ -63,4 +65,14 @@ model Message {
 
   user User @relation(fields: [userId], references: [id])
   board Board @relation(fields: [boardId], references: [id])
+}
+
+model Notification {
+  id Int @id @default(autoincrement())
+  userId Int
+  recieverId Int
+  title String
+  author String
+
+  user User @relation(fields: [userId], references: [id])
 }

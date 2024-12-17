@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await res.json();
-    cookies().set('token', data.token);
+    (await cookies()).set('token', data.token);
     return Response.json(data.user);
   }
 
@@ -72,6 +72,6 @@ export async function POST(request: NextRequest) {
   }
 
   const data = await res.json();
-  cookies().set('token', data.token);
+  (await cookies()).set('token', data.token);
   return Response.json(data.user);
 }

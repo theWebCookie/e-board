@@ -15,7 +15,7 @@ const appConfig: AppConfig = {
 };
 
 const isAuthenticated = async (): Promise<boolean> => {
-  const tokenCookie = cookies().get('token');
+  const tokenCookie = (await cookies()).get('token');
 
   if (!tokenCookie || !tokenCookie.value) {
     return false;

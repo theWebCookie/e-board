@@ -1,4 +1,4 @@
-import { status, account, board } from '../controllers';
+import { status, account, board, notification } from '../controllers';
 import { Router } from 'express';
 import { authenticateAndValidateJwt } from '../middleware/validateJwt';
 
@@ -18,5 +18,8 @@ router.get('/boards', board.boards);
 router.get('/boardsInvites', board.boardsInvites);
 router.get('/boardUsers', board.boardUsers);
 router.get('/userBoards', board.userBoards);
+
+router.post('/notification', notification.handleNotificationPost);
+router.get('/notification', notification.handleNotificationGet);
 
 export { router };
