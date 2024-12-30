@@ -1,7 +1,8 @@
 import Image from 'next/image';
+import { IMessage } from './Chat';
 
 interface IMessageProps {
-  message: string;
+  message: IMessage;
   isRight?: boolean;
 }
 
@@ -14,15 +15,20 @@ const Message: React.FC<IMessageProps> = ({ message, isRight = false }) => {
   const avatarClasses = isRight ? 'w-9 h-9 rounded-full mr-4' : '';
 
   return (
-    <li className={bubbleClasses}>
-      <Image src='/avatar.png' alt='Avatar' width={30} height={30} className={avatarClasses} />
-      <div className='flex items-center ml-3'>
-        <div className='max-w-[150px] break-words'>
-          <div className=''>{message}</div>
-          <div className='text-xs text-right mt-[2px]'>21:37</div>
-        </div>
+    <>
+      <div className={`font-light text-xs mb-1 ${isRight ? 'text-right' : 'text-left'}`}>
+        <p>{message.name}</p>
       </div>
-    </li>
+      <li className={bubbleClasses}>
+        <Image src='/avatar.png' alt='Avatar' width={30} height={30} className={avatarClasses} />
+        <div className='flex items-center ml-3'>
+          <div className='max-w-[150px] break-words'>
+            <div className='text-sm text-gray-900'>{message.message}</div>
+            <div className='text-xs text-right mt-[2px]'>21:37</div>
+          </div>
+        </div>
+      </li>
+    </>
   );
 };
 

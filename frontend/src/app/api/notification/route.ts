@@ -49,3 +49,27 @@ export async function GET() {
   const data = await res.json();
   return Response.json(data);
 }
+
+export async function DELETE(request: Request) {
+  const tokenCookie = await getCookie('token');
+  const token = tokenCookie?.value;
+  const body = await request.json();
+
+  const res = await fetch('http://localhost:3500/api/notification', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    cache: 'no-store',
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    return Response.json({ error: errorData.message }, { status: res.status });
+  }
+
+  const data = await res.json();
+  return Response.json(data);
+}

@@ -75,7 +75,7 @@ wss.on('connection', (client, req) => {
     if (messageData.type === 'message') {
       const roomId = messageData.roomId;
       if (roomId) {
-        broadcastToRoom(roomId, JSON.stringify(messageData));
+        broadcastToRoom(roomId, JSON.stringify(messageData), client);
       } else {
         console.log('Error: No room ID provided for message broadcast.');
       }
@@ -91,7 +91,7 @@ wss.on('connection', (client, req) => {
   });
 });
 
-function broadcastToRoom(roomId: string, msg: string) {
+function broadcastToRoom(roomId: string, msg: string, sender?: ws.WebSocket) {
   // console.log(`Broadcasting to room: ${roomId}`);
   // console.log(`Message: ${msg}`);
 

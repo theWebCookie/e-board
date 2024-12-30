@@ -59,7 +59,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     socket.onmessage = (message) => {
       const data = JSON.parse(message.data);
-      console.log('Received WebSocket message:', data);
+      // console.log('Received WebSocket message:', data);
 
       if (data.type === 'canvas') {
         const newElements = JSON.parse(data.elements);
@@ -86,7 +86,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       if (data.type === 'message') {
         console.log('Received message:', data.message);
-        setMessages((prevMessages) => [...prevMessages, { message: data.message, clientId: data.clientId }]);
+        setMessages((prevMessages) => [...prevMessages, { message: data.message, clientId: data.clientId, name: data.name }]);
+        console.log('Messages:', messages);
       }
 
       if (data.type === 'notification') {
@@ -164,10 +165,6 @@ const Home = () => {
       if (!response.ok) {
         return;
       }
-
-      const data = await response.json();
-      console.log(data);
-      // setNotifications([...notifications, data]);
     } catch (error) {
       console.error(error);
     }

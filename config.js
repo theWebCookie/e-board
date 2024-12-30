@@ -2,6 +2,10 @@
 export const passwordLength = 6;
 export const inviteCodeLength = 8; // also in backend/src/config.js
 
+export const genericDictionary = {
+  'generic-error': 'Coś poszło nie tak. Spróbuj ponownie później.',
+};
+
 export const errorDictionary = {
   'invalid-data': 'Błędne dane!',
   'email-already-in-use': 'Email jest już zajęty!',
@@ -56,6 +60,10 @@ export const tokenDictionary = {
   'token-is-required': 'Token jest wymagany.',
   'token-is-invalid': 'Niepoprawny token.',
   'token-is-expired': 'Token wygasł.',
+};
+
+export const notificationDictionary = {
+  'success-notification-delete': 'Usunięto powiadomienie.',
 };
 
 // Tools

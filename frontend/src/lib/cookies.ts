@@ -16,6 +16,8 @@ export async function removeCookies() {
   return new Promise<void>(async (resolve) => {
     const cookieStore = await cookies();
     cookieStore.delete('token');
+    cookieStore.delete('name');
+    cookieStore.delete('email');
     resolve();
   });
 }

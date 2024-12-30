@@ -49,15 +49,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  if (!authenticated && pathname.startsWith('/profile')) {
+  if (!authenticated && pathname.startsWith('/notifications')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  if (!authenticated && pathname.startsWith('/history')) {
+  if (!authenticated && pathname.startsWith('/calendar')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  if (!authenticated && pathname.startsWith('/board')) {
+  if (!authenticated && pathname.startsWith('/search')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 

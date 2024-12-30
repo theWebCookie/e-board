@@ -73,3 +73,13 @@ export const handleNotificationGet = async (req: Request, res: Response): Promis
 
   res.json(notifications);
 };
+
+export const handleNotificationDelete = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.body;
+
+  await prisma.notification.delete({
+    where: { id },
+  });
+
+  res.json({ message: 'Notification deleted' });
+};

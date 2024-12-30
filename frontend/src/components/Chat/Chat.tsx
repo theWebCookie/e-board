@@ -11,24 +11,23 @@ import { useForm } from 'react-hook-form';
 import { Textarea } from '../ui/textarea';
 import { ScrollArea } from '../ui/scroll-area';
 import { useWebSocket } from '@/app/home/page';
+import { getCookie } from '@/lib/cookies';
 
 interface IChatProps {
-  ws: WebSocket | null;
-  sendMessage: (message: any) => void;
-  messages: IMessage[];
-  clientId: string | null;
   boardName: string;
   className: string;
   roomId: string;
+  name: string;
 }
 
 export interface IMessage {
   message: string;
   clientId: string;
+  name: string;
 }
 
-const Chat: React.FC<IChatProps> = ({ messages, clientId, boardName, className, roomId }) => {
-  const { ws, sendMessage } = useWebSocket();
+const Chat: React.FC<IChatProps> = ({ boardName, className, roomId, name }) => {
+  const { ws, sendMessage, messages, clientId } = useWebSocket();
   const form = useForm<z.infer<typeof chatFormSchema>>({
     resolver: zodResolver(chatFormSchema),
     defaultValues: {
@@ -40,21 +39,20 @@ const Chat: React.FC<IChatProps> = ({ messages, clientId, boardName, className, 
 
   const onSubmit = async (values: z.infer<typeof chatFormSchema>) => {
     if (ws && clientId) {
-      const messageData = { type: 'message', message: values.message, clientId, roomId };
-      console.log(messageData);
+      const messageData = { type: 'message', message: values.message, clientId, roomId, name };
       sendMessage(messageData);
       form.setValue('message', '', { shouldValidate: false });
     }
   };
 
   return (
-    <div className={`w-80 p-3 pb-7 bg-slate-100 h-screen ${className}`}>
-      <h1 className='mb-1'>{boardName}</h1>
+    <div className={`w-80 p-3 pb-7 h-screen border border-l-neutral-600 ${className}`}>
+      <h1 className='mb-1 capitalize'>{boardName}</h1>
       <Separator />
       <ScrollArea className='h-full rounded-md p-1 pb-20'>
-        <Messages messages={messages} currentClientId={clientId} />
+        <Messages messages={messages as IMessage[]} currentClientId={clientId} />
       </ScrollArea>
-      <div className='py-3 absolute bottom-0 left-0 bg-slate-200 w-full'>
+      <div className='py-3 absolute bottom-0 left-0 w-full'>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex items-center justify-around w-full'>
             <FormField

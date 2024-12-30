@@ -21,5 +21,6 @@ router.get('/userBoards', board.userBoards);
 
 router.post('/notification', notification.handleNotificationPost);
 router.get('/notification', notification.handleNotificationGet);
+router.delete('/notification', notification.handleNotificationDelete);
 
 export { router };

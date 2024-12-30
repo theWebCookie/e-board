@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { NotificationItem } from './NotificationItem';
+import { genericDictionary, notificationDictionary, toastTimeout } from '@config';
+import { toast } from '../ui/use-toast';
 
 export interface Notification {
   id: number;
@@ -39,8 +41,35 @@ export const NotificationList = () => {
     fetchNotifications();
   }, []);
 
+  const handleNotificationDelete = async (id: number) => {
+    const res = await fetch('/api/notification', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      toast({
+        title: genericDictionary['generic-error'],
+        description: `${errorData.error}`,
+        duration: toastTimeout,
+      });
+      return;
+    }
+
+    setNotifications((prevNotifications) => prevNotifications.filter((notification) => notification.id !== id));
+
+    toast({
+      title: notificationDictionary['success-notification-delete'],
+      duration: toastTimeout,
+    });
+  };
+
   return (
-    <ul className='space-y-2'>
+    <ul className='space-y-2 max-h-96 overflow-y-auto'>
       {isLoading ? (
         Array.from({ length: 3 }).map((_, index) => (
           <li key={index}>
@@ -50,7 +79,9 @@ export const NotificationList = () => {
       ) : notifications.length === 0 ? (
         <p className='text-gray-300 text-center'>Brak powiadomień</p>
       ) : (
-        notifications.map((notification: Notification) => <NotificationItem key={notification.id} notification={notification} />)
+        notifications.map((notification: Notification) => (
+          <NotificationItem key={notification.id} notification={notification} handleNotificationDelete={handleNotificationDelete} />
+        ))
       )}
     </ul>
   );

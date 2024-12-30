@@ -16,6 +16,7 @@ const getInviteCode = () => {
 export const handleInviteByCode = async (req: Request, res: Response): Promise<void> => {
   const { code } = req.body;
   let boardId;
+  let boardName;
   const userId = (req.user as CustomJwtPayload).id;
 
   if (!code || code.length !== inviteCodeLength) {
@@ -36,6 +37,14 @@ export const handleInviteByCode = async (req: Request, res: Response): Promise<v
     }
 
     boardId = boardInvite.boardId;
+
+    const board = await prisma.board.findFirst({
+      where: {
+        id: boardInvite.boardId,
+      },
+    });
+
+    boardName = board?.name;
 
     if (!boardInvite.inviteActive) {
       res.status(400).json({ error: 'Zaproszenie nieaktywne!' });
@@ -65,7 +74,7 @@ export const handleInviteByCode = async (req: Request, res: Response): Promise<v
     res.status(500).json({ error });
   }
 
-  res.status(200).json({ message: 'Kod zaakceptowany!', boardId });
+  res.status(200).json({ message: 'Kod zaakceptowany!', boardId, boardName });
 };
 
 export const create = async (req: Request, res: Response): Promise<void> => {
