@@ -43,14 +43,15 @@ const InviteFormCode = () => {
     }
 
     const data = await res.json();
-    console.log(data);
+    const boardName = data.boardName;
+
     toast({
       title: boardToastDictionary['success-invite-toast-title'],
       description: 'Dołączono do tablicy',
       duration: toastTimeout,
     });
 
-    router.push(`/board/${data.boardId}`);
+    router.push(`/board/${data.boardId}-${boardName}`);
   };
 
   const code = form.watch('code');

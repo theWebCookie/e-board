@@ -3,8 +3,8 @@ import rough from 'roughjs';
 import { RoughCanvas } from 'roughjs/bin/canvas';
 import { Drawable } from 'roughjs/bin/core';
 import { Point as RoughPoint } from 'roughjs/bin/geometry';
-import { IImageData, IOptions } from './[id]/page';
 import { arrowHeadLength, bowingOptionValue } from '@config';
+import { IImageData, IOptions } from '@/components/Board/Board';
 
 export interface IBaseElement {
   id: number;

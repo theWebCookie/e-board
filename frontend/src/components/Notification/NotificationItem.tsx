@@ -6,10 +6,12 @@ import { Notification } from './NotificationList';
 
 interface NotificationItemProps {
   notification: Notification;
+  handleNotificationDelete: (id: number) => void;
 }
 
-export const NotificationItem: FC<NotificationItemProps> = ({ notification }) => {
-  const { title, author } = notification;
+export const NotificationItem: FC<NotificationItemProps> = ({ notification, handleNotificationDelete }) => {
+  const { id, title, author } = notification;
+
   return (
     <li className='flex justify-between items-center my-3 p-3 bg-[#121215] rounded-xl'>
       <div className='flex items-center gap-3'>
@@ -22,7 +24,7 @@ export const NotificationItem: FC<NotificationItemProps> = ({ notification }) =>
         </div>
       </div>
       <div>
-        <Button variant='ghost'>
+        <Button variant='ghost' onClick={() => handleNotificationDelete(id)}>
           {' '}
           <Trash />
         </Button>

@@ -46,7 +46,9 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await res.json();
-    cookies().set('token', data.token);
+    (await cookies()).set('token', data.token);
+    (await cookies()).set('name', name);
+    (await cookies()).set('email', email);
     return Response.json(data.user);
   }
 
@@ -72,6 +74,13 @@ export async function POST(request: NextRequest) {
   }
 
   const data = await res.json();
-  cookies().set('token', data.token);
+  const emailDecoded = decodeURIComponent(data.user.email);
+
+  console.log(emailDecoded);
+
+  (await cookies()).set('token', data.token);
+  (await cookies()).set('name', data.user.name);
+  (await cookies()).set('email', data.user.email);
+
   return Response.json(data.user);
 }

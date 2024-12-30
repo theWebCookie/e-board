@@ -1,5 +1,5 @@
+'use client';
 import { Calendar, ChevronUp, Home, Inbox, Search, Settings, User2 } from 'lucide-react';
-
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +12,9 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@radix-ui/react-dropdown-menu';
+import { getCookie, removeCookies } from '@/lib/cookies';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const items = [
   {
@@ -45,6 +48,24 @@ const other = [
 ];
 
 export function AppSidebar() {
+  const [userName, setUserName] = useState<string | undefined>();
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchCookie = async () => {
+      const cookie = await getCookie('name');
+      const name = cookie?.value;
+      setUserName(name);
+    };
+
+    fetchCookie();
+  }, []);
+
+  const handleSignOut = () => {
+    removeCookies();
+    router.push('/');
+  };
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -89,13 +110,13 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User2 /> Username
+                  <User2 /> {userName ? userName : 'Ładowanie...'}
                   <ChevronUp className='ml-auto' />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side='top' className='w-[--radix-popper-anchor-width]'>
-                <DropdownMenuItem>
-                  <span>Sign out</span>
+                <DropdownMenuItem className='m-2 cursor-pointer text-right'>
+                  <span onClick={handleSignOut}>Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

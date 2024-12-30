@@ -15,7 +15,7 @@ const appConfig: AppConfig = {
 };
 
 const isAuthenticated = async (): Promise<boolean> => {
-  const tokenCookie = cookies().get('token');
+  const tokenCookie = (await cookies()).get('token');
 
   if (!tokenCookie || !tokenCookie.value) {
     return false;
@@ -49,15 +49,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  if (!authenticated && pathname.startsWith('/profile')) {
+  if (!authenticated && pathname.startsWith('/notifications')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  if (!authenticated && pathname.startsWith('/history')) {
+  if (!authenticated && pathname.startsWith('/calendar')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  if (!authenticated && pathname.startsWith('/board')) {
+  if (!authenticated && pathname.startsWith('/search')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 

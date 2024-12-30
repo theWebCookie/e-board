@@ -19,7 +19,7 @@ const Messages: React.FC<IMessagesProps> = ({ messages, currentClientId }) => {
   return (
     <ul>
       {messages.map((msg, index) => (
-        <Message key={index} message={msg.message} isRight={msg.clientId === currentClientId} />
+        <Message key={index} message={msg} isRight={msg.clientId === currentClientId} />
       ))}
       <li ref={scrollRef}></li>
     </ul>

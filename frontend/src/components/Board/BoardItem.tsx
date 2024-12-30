@@ -16,7 +16,7 @@ export const BoardItem: FC<BoardItemProps> = ({ board }) => {
 
   const handleJoinRoom = () => {
     sendMessage({ type: 'join-room', roomId: id });
-    router.push(`/board/${id}`);
+    router.push(`/board/${id}-${name}`);
   };
 
   return (

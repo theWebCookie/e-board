@@ -1,4 +1,3 @@
-import { useBoard } from '@/app/board/[id]/page';
 import useHistory from '@/components/Canvas/useHistory';
 import {
   adjustElementCoordinates,
@@ -17,16 +16,14 @@ import {
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import rough from 'roughjs';
 import usePressedKeys from './usePressedKeys';
+import { useBoard } from '../Board/BoardProvider';
+import { useWebSocket } from '@/app/home/page';
 
 interface CanvasProps {
-  ws: WebSocket | null;
-  sendMessage: (message: any) => void;
-  receivedElements: IElement[];
   roomId: string;
-  clientId: string | null;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, roomId, clientId }) => {
+const Canvas: React.FC<CanvasProps> = ({ roomId }) => {
   const { setIsHidden, setTool, tool, options, imageData } = useBoard();
   const { state: elements, setState: setElements, undo, redo } = useHistory<IElement[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -42,6 +39,8 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [elementsToErase, setElementsToErase] = useState<Set<IElement | number>>(new Set());
   const [erasePath, setErasePath] = useState<{ x: number; y: number }[]>([]);
+
+  const { ws, sendMessage, receivedElements, clientId } = useWebSocket();
 
   useLayoutEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -83,8 +82,6 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  console.log(receivedElements);
-
   useEffect(() => {
     const undoRedoFunction = (event: React.KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'z') undo();
@@ -120,7 +117,7 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
   }, [dimensions]);
 
   useEffect(() => {
-    const sendCanvasData = () => {
+    const sendCanvasData = async () => {
       if (ws && ws.readyState === ws.OPEN) {
         const canvasData = {
           type: 'canvas',
@@ -128,12 +125,11 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
           clientId,
           roomId,
         };
-        console.log('elements z funkcji', elements);
         sendMessage(canvasData);
       }
     };
     sendCanvasData();
-  }, [elements, sendMessage, ws, clientId, roomId]);
+  }, [elements]);
 
   useEffect(() => {
     const panOrZoomFunction = (event: WheelEvent) => {
@@ -198,7 +194,6 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
       }
     } else {
       if (tool === 'image' && imageData) {
-        console.log(imageData);
         const imgWidth = imageData.width;
         const imgHeight = imageData.height;
         const centerX = clientX;
@@ -211,7 +206,6 @@ const Canvas: React.FC<CanvasProps> = ({ ws, sendMessage, receivedElements, room
 
         const id = elements.length;
         const imageElement = createElement(id, x1, y1, x2, y2, 'image', null, imageData);
-        console.log(imageElement);
         setElements((prevState) => [...prevState, imageElement]);
         setSelectedElement(imageElement);
         return;

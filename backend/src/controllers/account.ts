@@ -68,6 +68,8 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
     req.session.jwtToken = token;
 
+    console.log(email);
+
     res.status(200).json({ message: 'Zalogowano pomyślnie', token, user: { id: user.id, name: user.name, email: user.email } });
   } catch (error) {
     res.status(500).json({ error });

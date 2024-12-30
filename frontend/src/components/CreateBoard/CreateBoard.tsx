@@ -63,7 +63,7 @@ const CreateBoard = () => {
     });
 
     setTimeout(() => {
-      router.push(`/board/${data.boardId}`);
+      router.push(`/board/${data.boardId}-${boardName}`);
     }, 2000);
   };
 
