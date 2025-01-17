@@ -5,6 +5,8 @@ import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import config from 'config';
 import { IAppConfig } from './app';
+import { handleBoardContentSave, handleBoardContentSaveDebounced } from './controllers/board';
+import { handleMessagesSave } from './controllers/message';
 
 const server = createServer((req, res) => {
   return staticHandler(req, res, { public: 'public' });
@@ -16,6 +18,8 @@ export const wss = new WebSocketServer({ server });
 
 const rooms: { [key: string]: ws.WebSocket[] } = {};
 let canvasImage: string | null = null;
+const boardContentCache: { [boardId: string]: any } = {};
+
 export const clientUserMap: Map<ws.WebSocket, string> = new Map();
 
 wss.on('connection', (client, req) => {
@@ -64,9 +68,14 @@ wss.on('connection', (client, req) => {
       canvasImage = messageData.data;
       messageData.data = canvasImage;
 
+      handleBoardContentSaveDebounced(messageData, messageData.roomId);
+
       const roomId = messageData.roomId;
+
+      boardContentCache[roomId] = messageData.data;
+
       if (roomId) {
-        broadcastToRoom(roomId, JSON.stringify(messageData));
+        broadcastToRoom(roomId, JSON.stringify(messageData), client);
       } else {
         console.log('Error: No room ID provided for canvas broadcast.');
       }
@@ -74,8 +83,11 @@ wss.on('connection', (client, req) => {
 
     if (messageData.type === 'message') {
       const roomId = messageData.roomId;
+
+      handleMessagesSave(messageData.message.message, roomId, clientId);
+
       if (roomId) {
-        broadcastToRoom(roomId, JSON.stringify(messageData), client);
+        broadcastToRoom(roomId, JSON.stringify(messageData));
       } else {
         console.log('Error: No room ID provided for message broadcast.');
       }
@@ -92,30 +104,9 @@ wss.on('connection', (client, req) => {
 });
 
 function broadcastToRoom(roomId: string, msg: string, sender?: ws.WebSocket) {
-  // console.log(`Broadcasting to room: ${roomId}`);
-  // console.log(`Message: ${msg}`);
-
-  // const clientsInRoom = rooms[roomId];
-  // if (clientsInRoom) {
-  //   clientsInRoom.forEach((client) => {
-  //     if (client.readyState === ws.OPEN) {
-  //       client.send(msg); // Send the message to the client
-  //     }
-  //   });
-  // } else {
-  //   console.log(`No clients in room: ${roomId}`);
-  // }
   for (const client of wss.clients) {
-    if (client.readyState === ws.OPEN) {
+    if (client.readyState === ws.OPEN && client != sender) {
       console.log('Broadcasting to all clients', msg);
-      client.send(msg);
-    }
-  }
-}
-
-function broadcast(msg: string) {
-  for (const client of wss.clients) {
-    if (client.readyState === ws.OPEN) {
       client.send(msg);
     }
   }

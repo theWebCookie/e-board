@@ -94,7 +94,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       data: {
         id: boardId,
         name,
-        content: Buffer.from([]),
+        content: {},
         authorId: parseInt(userId),
         createdAt: currentDate,
         updatedAt: currentDate,
@@ -182,4 +182,83 @@ export const userBoards = async (req: Request, res: Response): Promise<void> => 
   });
 
   res.status(200).json({ boardsWithUsers });
+};
+
+export const handleBoardContentSave = async (content: any, boardId: string): Promise<void> => {
+  if (!boardId || !content) {
+    console.log('Błędne dane!');
+    return;
+  }
+
+  try {
+    await prisma.board.update({
+      where: {
+        id: boardId,
+      },
+      data: {
+        content,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+  }
+  console.log('Zapisano dane!');
+};
+
+export const handleBoardContentLoad = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.query;
+
+  if (!id) {
+    res.status(400).json({ error: 'Błędne dane!' });
+    return;
+  }
+
+  try {
+    const board = await prisma.board.findFirst({
+      where: {
+        id: Array.isArray(id) ? id[0] : id,
+      },
+    });
+
+    if (!board) {
+      res.status(404).json({ error: 'Tablica nie znaleziona!' });
+      return;
+    }
+
+    res.status(200).json({ content: board.content });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Błąd serwera!' });
+  }
+};
+
+const saveQueue: { [boardId: string]: NodeJS.Timeout } = {};
+
+export const handleBoardContentSaveDebounced = async (content: any, boardId: string): Promise<void> => {
+  if (!boardId || !content) {
+    console.log('Błędne dane!');
+    return;
+  }
+
+  if (saveQueue[boardId]) {
+    clearTimeout(saveQueue[boardId]);
+  }
+
+  saveQueue[boardId] = setTimeout(async () => {
+    try {
+      await prisma.board.update({
+        where: {
+          id: boardId,
+        },
+        data: {
+          content,
+        },
+      });
+      console.log(`Dane zapisane dla boardId: ${boardId}`);
+    } catch (error) {
+      console.error(`Błąd podczas zapisu dla boardId: ${boardId}`, error);
+    } finally {
+      delete saveQueue[boardId];
+    }
+  }, 2000);
 };

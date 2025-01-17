@@ -18,15 +18,17 @@ interface IChatProps {
   className: string;
   roomId: string;
   name: string;
+  dbMessages?: any;
 }
 
 export interface IMessage {
   message: string;
   clientId: string;
   name: string;
+  sentAt: string;
 }
 
-const Chat: React.FC<IChatProps> = ({ boardName, className, roomId, name }) => {
+const Chat: React.FC<IChatProps> = ({ boardName, className, roomId, name, dbMessages }) => {
   const { ws, sendMessage, messages, clientId } = useWebSocket();
   const form = useForm<z.infer<typeof chatFormSchema>>({
     resolver: zodResolver(chatFormSchema),
@@ -39,18 +41,18 @@ const Chat: React.FC<IChatProps> = ({ boardName, className, roomId, name }) => {
 
   const onSubmit = async (values: z.infer<typeof chatFormSchema>) => {
     if (ws && clientId) {
-      const messageData = { type: 'message', message: values.message, clientId, roomId, name };
+      const messageData = { type: 'message', clientId, roomId, message: { message: values.message, name, sentAt: Date.now() } };
       sendMessage(messageData);
       form.setValue('message', '', { shouldValidate: false });
     }
   };
 
   return (
-    <div className={`w-80 p-3 pb-7 h-screen border border-l-neutral-600 ${className}`}>
+    <div className={`w-1/5 p-3 pb-7 h-screen border border-l-neutral-600 ${className}`}>
       <h1 className='mb-1 capitalize'>{boardName}</h1>
       <Separator />
       <ScrollArea className='h-full rounded-md p-1 pb-20'>
-        <Messages messages={messages as IMessage[]} currentClientId={clientId} />
+        <Messages messages={[...dbMessages, ...messages] as IMessage[]} currentClientId={clientId} />
       </ScrollArea>
       <div className='py-3 absolute bottom-0 left-0 w-full'>
         <Form {...form}>

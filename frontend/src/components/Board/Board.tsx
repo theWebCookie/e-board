@@ -36,8 +36,9 @@ export interface IImageData {
 
 export const Board: React.FC<IBoardProps> = ({ id, boardName }) => {
   const { isHidden, isToolMenuOpen } = useBoard();
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const router = useRouter();
+  const [dbElements, setDbElements] = useState('');
+  const [dbMessages, setDbMessages] = useState([]);
   const handleGoBack = useCallback(() => router.back(), [router]);
 
   const [userName, setUserName] = useState<string | undefined>(undefined);
@@ -48,28 +49,46 @@ export const Board: React.FC<IBoardProps> = ({ id, boardName }) => {
     });
   }, []);
 
-  const handleChatOpen = () => {
-    setIsChatOpen(!isChatOpen);
-  };
+  useEffect(() => {
+    const loadCanvas = async () => {
+      const res = await fetch(`/api/load?id=${id}`);
+
+      if (res.ok) {
+        const data = await res.json();
+        setDbElements(data.content.elements);
+      }
+
+      return;
+    };
+
+    const loadMessages = async () => {
+      const res = await fetch(`/api/messages?id=${id}`);
+
+      if (res.ok) {
+        const data = await res.json();
+        setDbMessages(data.messages);
+      }
+
+      return;
+    };
+
+    loadCanvas();
+    loadMessages();
+  }, [id]);
 
   return (
     <div className='w-full h-screen'>
-      <Canvas roomId={id} />
+      <Canvas roomId={id} dbElements={dbElements} />
       <div className='flex items-center justify-center absolute top-7 left-7 w-full'>
         <Arrow className='absolute left-2.5' fn={handleGoBack} />
         <ToolPicker className='flex justify-center flex-grow mx-auto' />
       </div>
-      <Arrow
-        className={`absolute right-0 bottom-1/2 translate-x-[-28px] translate-y-1/2 transition-transform ${
-          isChatOpen ? 'translate-x-[-296px] rotate-180 z-10 bg-white size-12 rounded-full flex items-center justify-center' : ''
-        }`}
-        fn={handleChatOpen}
-      />
       <Chat
         roomId={id}
         boardName={boardName}
-        className={`absolute top-0 right-0 transition-transform ${isChatOpen ? 'translate-x-0' : 'translate-x-[20rem]'} ${isHidden ? 'hidden' : ''}`}
+        className={`absolute top-0 right-0 transition-transform`}
         name={userName || 'User'}
+        dbMessages={dbMessages}
       />
       <ToolMenu className={`absolute top-1/3 left-7 border-2 rounded ${isToolMenuOpen ? '' : 'hidden'}`} />
       <BoardButton className='absolute bottom-7 left-7' alt='board-button' path='/board-button.svg' />

@@ -4,7 +4,7 @@ import { BoardProvider } from '@/components/Board/BoardProvider';
 import React from 'react';
 
 interface IBoardPageProps {
-  params: IBoardProps;
+  params: Promise<IBoardProps>;
 }
 export interface IBoardProps {
   id: string;

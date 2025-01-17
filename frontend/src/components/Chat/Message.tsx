@@ -14,6 +14,16 @@ const Message: React.FC<IMessageProps> = ({ message, isRight = false }) => {
   }`;
   const avatarClasses = isRight ? 'w-9 h-9 rounded-full mr-4' : '';
 
+  const date = new Date(message.sentAt);
+
+  const formattedTime = date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  console.log(message);
+
   return (
     <>
       <div className={`font-light text-xs mb-1 ${isRight ? 'text-right' : 'text-left'}`}>
@@ -24,7 +34,7 @@ const Message: React.FC<IMessageProps> = ({ message, isRight = false }) => {
         <div className='flex items-center ml-3'>
           <div className='max-w-[150px] break-words'>
             <div className='text-sm text-gray-900'>{message.message}</div>
-            <div className='text-xs text-right mt-[2px]'>21:37</div>
+            <div className='text-xs text-right mt-[2px]'>{formattedTime}</div>
           </div>
         </div>
       </li>

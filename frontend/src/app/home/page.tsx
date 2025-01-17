@@ -86,7 +86,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       if (data.type === 'message') {
         console.log('Received message:', data.message);
-        setMessages((prevMessages) => [...prevMessages, { message: data.message, clientId: data.clientId, name: data.name }]);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { message: data.message.message, clientId: data.clientId, name: data.message.name, sentAt: data.message.sentAt },
+        ]);
         console.log('Messages:', messages);
       }
 

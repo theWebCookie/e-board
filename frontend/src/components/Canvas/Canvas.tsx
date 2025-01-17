@@ -21,9 +21,10 @@ import { useWebSocket } from '@/app/home/page';
 
 interface CanvasProps {
   roomId: string;
+  dbElements?: string;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ roomId }) => {
+const Canvas: React.FC<CanvasProps> = ({ roomId, dbElements }) => {
   const { setIsHidden, setTool, tool, options, imageData } = useBoard();
   const { state: elements, setState: setElements, undo, redo } = useHistory<IElement[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -39,8 +40,35 @@ const Canvas: React.FC<CanvasProps> = ({ roomId }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [elementsToErase, setElementsToErase] = useState<Set<IElement | number>>(new Set());
   const [erasePath, setErasePath] = useState<{ x: number; y: number }[]>([]);
+  const [elementsLoaded, setElementsLoaded] = useState(false);
 
   const { ws, sendMessage, receivedElements, clientId } = useWebSocket();
+
+  const debounce = (func: Function, delay: number) => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    return (...args: any[]) => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
+
+  useEffect(() => {
+    if (dbElements) {
+      try {
+        const parsedElements: IElement[] = JSON.parse(dbElements);
+        setElements((prevState) => {
+          const existingIds = new Set(prevState.map((el) => el.id));
+          const newElements = parsedElements.filter((el) => !existingIds.has(el.id));
+          return [...prevState, ...newElements];
+        });
+        setElementsLoaded(!elementsLoaded);
+      } catch (error) {
+        console.error('Error parsing dbElements:', error);
+      }
+    }
+  }, [dbElements]);
 
   useLayoutEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -63,9 +91,10 @@ const Canvas: React.FC<CanvasProps> = ({ roomId }) => {
     context.translate(panOffset.x * scale - scaleOffsetX, panOffset.y * scale - scaleOffsetY);
     context.scale(scale, scale);
 
-    receivedElements.forEach((element) => {
+    [...elements, ...receivedElements].forEach((element) => {
       drawElement(roughCanvas, context, element);
     });
+
     context.restore();
 
     setIsHidden(false);
@@ -117,7 +146,8 @@ const Canvas: React.FC<CanvasProps> = ({ roomId }) => {
   }, [dimensions]);
 
   useEffect(() => {
-    const sendCanvasData = async () => {
+    // const sendCanvasData = debounce(async () => {
+    const sendCanvasData = () => {
       if (ws && ws.readyState === ws.OPEN) {
         const canvasData = {
           type: 'canvas',
@@ -127,6 +157,7 @@ const Canvas: React.FC<CanvasProps> = ({ roomId }) => {
         };
         sendMessage(canvasData);
       }
+      // }, 1000);
     };
     sendCanvasData();
   }, [elements]);
@@ -381,7 +412,7 @@ const Canvas: React.FC<CanvasProps> = ({ roomId }) => {
     <>
       <canvas
         id='canvas'
-        className='w-full h-screen relative'
+        className='w-4/5 h-screen relative'
         width={dimensions.width}
         height={dimensions.height}
         onMouseDown={handleMouseDown}
