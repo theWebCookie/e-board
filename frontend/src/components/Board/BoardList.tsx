@@ -22,7 +22,7 @@ export const BoardList = () => {
     fetchBoards();
   }, []);
   return (
-    <ul>
+    <ul className='max-h-96 overflow-y-auto'>
       {isLoading ? (
         Array.from({ length: 3 }).map((_, index) => (
           <li key={index}>

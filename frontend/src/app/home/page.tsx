@@ -50,7 +50,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [messages, setMessages] = useState<IMessage[]>([]);
 
   useEffect(() => {
-    const socket = new WebSocket('ws://localhost:8080');
+    const socket = new WebSocket('ws://localhost:3500');
     setWs(socket);
 
     socket.onopen = () => {
@@ -59,7 +59,6 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     socket.onmessage = (message) => {
       const data = JSON.parse(message.data);
-      // console.log('Received WebSocket message:', data);
 
       if (data.type === 'canvas') {
         const newElements = JSON.parse(data.elements);
@@ -95,8 +94,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       if (data.type === 'notification') {
         toast({
-          title: data.notification.title,
-          description: data.notification.author.name,
+          title: data.title,
+          description: data.name,
           duration: toastTimeout,
         });
       }
@@ -149,39 +148,12 @@ export const useWebSocket = (): WebSocketContextType => {
 };
 
 const Home = () => {
-  const handleNotificationPost = async () => {
-    const notificationData = {
-      title: 'New notification',
-      recieverIds: [1, 2, 3],
-      userId: 1,
-    };
-
-    try {
-      const response = await fetch('/api/notification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(notificationData),
-      });
-
-      if (!response.ok) {
-        return;
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   return (
     <WebSocketProvider>
       <LayoutWithNav>
         <MainLayout title='Tablice' isButtonVisible buttonComponent={<CreateBoard />}>
           <InviteCodeForm />
           <BoardList />
-          <li>
-            <Button onClick={handleNotificationPost}>Powiadomienie</Button>
-          </li>
         </MainLayout>
         <Toaster />
       </LayoutWithNav>

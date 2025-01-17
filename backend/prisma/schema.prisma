@@ -73,6 +73,7 @@ model Notification {
   recieverId Int
   title String
   author String
+  roomId Int?
 
   user User @relation(fields: [userId], references: [id])
 }

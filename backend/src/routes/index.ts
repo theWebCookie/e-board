@@ -20,7 +20,6 @@ router.get('/boardUsers', board.boardUsers);
 router.get('/userBoards', board.userBoards);
 router.get('/load', board.handleBoardContentLoad);
 
-router.post('/notification', notification.handleNotificationPost);
 router.get('/notification', notification.handleNotificationGet);
 router.delete('/notification', notification.handleNotificationDelete);
 

@@ -1,8 +1,5 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import ws from 'ws';
-import { clientUserMap, wss } from '../index';
-import cookie from 'cookie';
 
 interface Notification {
   id: number;
@@ -14,13 +11,45 @@ interface Notification {
 
 const prisma = new PrismaClient();
 
-export const handleNotificationPost = async (req: Request, res: Response): Promise<void> => {
-  const { title, recieverIds, userId } = req.body;
+export const handleNotificationSave = async (
+  title: string,
+  userId: number,
+  recieverIds?: Array<number>,
+  roomId?: string | undefined
+): Promise<void> => {
+  if (recieverIds && recieverIds?.length > 0) {
+    const author = await prisma.user.findUnique({
+      where: { id: userId },
+    });
 
-  console.log(req.body);
+    if (!author) {
+      console.log('User not found');
+      return;
+    }
+
+    const notificationData = recieverIds.map((reciever) => ({
+      title,
+      recieverId: reciever,
+      userId,
+      author: author.name,
+    }));
+
+    const createdNotifications = await prisma.notification.createMany({
+      data: notificationData,
+    });
+
+    console.log({ message: 'Notifications sent', createdNotifications });
+    return;
+  }
+
+  const usersOnBoard = await prisma.usersOnBoards.findMany({
+    where: { boardId: roomId },
+  });
+
+  const roomRecieverIds = usersOnBoard.map((user) => user.userId);
 
   const recievers = await prisma.user.findMany({
-    where: { id: { in: recieverIds } },
+    where: { id: { in: roomRecieverIds } },
   });
 
   const author = await prisma.user.findUnique({
@@ -28,7 +57,7 @@ export const handleNotificationPost = async (req: Request, res: Response): Promi
   });
 
   if (!author) {
-    res.status(404).json({ message: 'User not found' });
+    console.log('User not found');
     return;
   }
 
@@ -43,25 +72,7 @@ export const handleNotificationPost = async (req: Request, res: Response): Promi
     data: notificationData,
   });
 
-  const msg = JSON.stringify({
-    type: 'notification',
-    notification: {
-      title,
-      author,
-    },
-  });
-
-  for (const client of wss.clients) {
-    if (client.readyState === ws.OPEN) {
-      console.log('here');
-      const userIdFromClient = clientUserMap.get(client);
-      if (userIdFromClient && recieverIds.includes(userIdFromClient)) {
-        client.send(msg);
-      }
-    }
-  }
-
-  res.status(201).json({ message: 'Notifications sent', createdNotifications });
+  console.log({ message: 'Notifications sent', createdNotifications });
 };
 
 export const handleNotificationGet = async (req: Request, res: Response): Promise<void> => {

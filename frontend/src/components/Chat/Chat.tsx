@@ -43,6 +43,13 @@ const Chat: React.FC<IChatProps> = ({ boardName, className, roomId, name, dbMess
     if (ws && clientId) {
       const messageData = { type: 'message', clientId, roomId, message: { message: values.message, name, sentAt: Date.now() } };
       sendMessage(messageData);
+      sendMessage({
+        type: 'notification',
+        title: `Nowa wiadomość na tablicy ${boardName}`,
+        recieverId: [],
+        userId: clientId,
+        roomId,
+      });
       form.setValue('message', '', { shouldValidate: false });
     }
   };
