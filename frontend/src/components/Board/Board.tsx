@@ -86,7 +86,7 @@ export const Board: React.FC<IBoardProps> = ({ id, boardName }) => {
       <Chat
         roomId={id}
         boardName={boardName}
-        className={`absolute top-0 right-0 transition-transform`}
+        className={`absolute top-0 right-0 h-full w-[300px]`}
         name={userName || 'User'}
         dbMessages={dbMessages}
       />

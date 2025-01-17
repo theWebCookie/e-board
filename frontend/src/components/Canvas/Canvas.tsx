@@ -412,7 +412,7 @@ const Canvas: React.FC<CanvasProps> = ({ roomId, dbElements }) => {
     <>
       <canvas
         id='canvas'
-        className='w-4/5 h-screen relative'
+        className='absolute top-0 left-0 w-full h-full'
         width={dimensions.width}
         height={dimensions.height}
         onMouseDown={handleMouseDown}

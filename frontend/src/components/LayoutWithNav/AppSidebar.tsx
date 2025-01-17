@@ -28,16 +28,6 @@ const items = [
     url: '/notifications',
     icon: Inbox,
   },
-  {
-    title: 'Kalendarz',
-    url: '/calendar',
-    icon: Calendar,
-  },
-  {
-    title: 'Szukaj',
-    url: '/search',
-    icon: Search,
-  },
 ];
 
 const other = [

@@ -55,7 +55,7 @@ const Chat: React.FC<IChatProps> = ({ boardName, className, roomId, name, dbMess
   };
 
   return (
-    <div className={`w-1/5 p-3 pb-7 h-screen border border-l-neutral-600 ${className}`}>
+    <div className={`p-3 pb-7 h-screen border border-l-neutral-600 bg-slate-900 ${className}`}>
       <h1 className='mb-1 capitalize'>{boardName}</h1>
       <Separator />
       <ScrollArea className='h-full rounded-md p-1 pb-20'>
