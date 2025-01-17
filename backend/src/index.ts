@@ -38,7 +38,7 @@ export function setupWebSocketServer(server: Server) {
     client.send(JSON.stringify({ type: 'client-id', clientId }));
     console.log(`Client connected, id: ${clientId}`);
 
-    client.on('message', (msg: string) => {
+    client.on('message', async (msg: string) => {
       const messageData = JSON.parse(msg);
       messageData.clientId = clientId;
 
@@ -65,7 +65,7 @@ export function setupWebSocketServer(server: Server) {
         canvasImage = messageData.data;
         messageData.data = canvasImage;
 
-        handleBoardContentSaveDebounced(messageData, messageData.roomId);
+        await handleBoardContentSaveDebounced(messageData, messageData.roomId);
 
         const roomId = messageData.roomId;
 
@@ -114,11 +114,14 @@ export function setupWebSocketServer(server: Server) {
     });
   });
 
-  function broadcastToRoom(roomId: string, msg: string, sender?: ws.WebSocket) {
+  async function broadcastToRoom(roomId: string, msg: string, sender?: ws.WebSocket) {
     for (const client of wss.clients) {
-      if (client.readyState === ws.OPEN && client != sender) {
-        console.log('Broadcasting to all clients', msg);
-        client.send(msg);
+      if (client.readyState === ws.OPEN && client !== sender) {
+        try {
+          client.send(msg);
+        } catch (error) {
+          console.error('Error broadcasting to client:', error);
+        }
       }
     }
   }
