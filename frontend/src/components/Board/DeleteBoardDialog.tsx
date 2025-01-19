@@ -23,15 +23,17 @@ const DeleteBoardDialog: React.FC<DeleteBoardDialogProps> = ({ boardId, handleBo
           <DialogDescription>Czy jesteś pewny, że chcesz usunąć tę tablicę? Ta operacja nie może być cofnięta.</DialogDescription>
         </DialogHeader>
         <div>
-          <DialogFooter className='sm:justify-around'>
-            <Button type='submit' onClick={() => handleBoardDelete(boardId)}>
-              Usuń
-            </Button>
-            <DialogClose asChild>
-              <Button type='button' variant='secondary'>
-                Anuluj
+          <DialogFooter className='sm:justify-around p-2'>
+            <div className='flex gap-4'>
+              <Button type='submit' onClick={() => handleBoardDelete(boardId)}>
+                Usuń
               </Button>
-            </DialogClose>
+              <DialogClose asChild>
+                <Button type='button' variant='secondary'>
+                  Anuluj
+                </Button>
+              </DialogClose>
+            </div>
           </DialogFooter>
         </div>
       </DialogContent>
