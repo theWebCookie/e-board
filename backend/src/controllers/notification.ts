@@ -86,11 +86,27 @@ export const handleNotificationGet = async (req: Request, res: Response): Promis
 };
 
 export const handleNotificationDelete = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.body;
+  const { id, userId } = req.body;
 
-  await prisma.notification.delete({
-    where: { id },
-  });
+  if (!id || !userId) {
+    res.status(400).json({ message: 'Notification ID and User ID are required' });
+    return;
+  }
 
-  res.json({ message: 'Notification deleted' });
+  try {
+    const notification = await prisma.notification.deleteMany({
+      where: {
+        id,
+        recieverId: userId,
+      },
+    });
+
+    if (notification.count === 0) {
+      res.status(404).json({ message: 'Notification not found for the specified user' });
+    } else {
+      res.json({ message: 'Notification deleted' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred while deleting the notification', error });
+  }
 };

@@ -13,7 +13,7 @@ export const NotificationItem: FC<NotificationItemProps> = ({ notification, hand
   const { id, title, author } = notification;
 
   return (
-    <li className='flex justify-between items-center my-3 p-3 bg-[#121215] rounded-xl'>
+    <li className='flex justify-between items-center my-3 p-3 bg-[#e4e5f1] rounded-xl'>
       <div className='flex items-center gap-3'>
         <div className='ml-3'>
           <Bell />

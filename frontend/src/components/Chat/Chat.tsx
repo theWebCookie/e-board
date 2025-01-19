@@ -55,7 +55,7 @@ const Chat: React.FC<IChatProps> = ({ boardName, className, roomId, name, dbMess
   };
 
   return (
-    <div className={`p-3 pb-7 h-screen border border-l-neutral-600 bg-slate-900 ${className}`}>
+    <div className={`p-3 pb-7 h-screen border border-l-[#e9f0ff] bg-[#e9f0ff] ${className}`}>
       <h1 className='mb-1 capitalize'>{boardName}</h1>
       <Separator />
       <ScrollArea className='h-full rounded-md p-1 pb-20'>
@@ -75,7 +75,7 @@ const Chat: React.FC<IChatProps> = ({ boardName, className, roomId, name, dbMess
                 </FormItem>
               )}
             />
-            <Button type='submit' disabled={!messageValue.trim()} className='mr-3'>
+            <Button type='submit' disabled={!messageValue.trim()} className='mr-3 bg-slate-600'>
               <Image src='/send.svg' alt='send' width={20} height={20} />
             </Button>
           </form>

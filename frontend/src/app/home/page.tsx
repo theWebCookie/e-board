@@ -26,6 +26,7 @@ export interface IBoardWithUsers extends IBoard {
   inviteCode: string;
   createdAt: Date;
   updatedAt: Date;
+  authorId: number;
 }
 
 interface WebSocketContextType {

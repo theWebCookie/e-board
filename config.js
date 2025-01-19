@@ -54,6 +54,7 @@ export const boardToastDictionary = {
   'fail-board-toast-title': 'Błąd podczas tworzenia tablicy ☹️',
   'success-invite-toast-title': 'Dołączono pomyślnie 😊',
   'fail-invite-toast-title': 'Błąd podczas dołączania ☹️',
+  'success-delete-toast-title': 'Usunięto tablicę pomyślnie 😊',
 };
 
 export const tokenDictionary = {

@@ -4,6 +4,8 @@ import { Skeleton } from '../ui/skeleton';
 import { NotificationItem } from './NotificationItem';
 import { genericDictionary, notificationDictionary, toastTimeout } from '@config';
 import { toast } from '../ui/use-toast';
+import { getCookie } from '@/lib/cookies';
+import { decodeJwt } from 'jose';
 
 export interface Notification {
   id: number;
@@ -42,12 +44,17 @@ export const NotificationList = () => {
   }, []);
 
   const handleNotificationDelete = async (id: number) => {
+    const tokenCookie = await getCookie('token');
+    const token = tokenCookie?.value;
+    const decoded = token && decodeJwt(token);
+    const userId = decoded ? decoded.id : null;
+
     const res = await fetch('/api/notification', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id, userId }),
     });
 
     if (!res.ok) {

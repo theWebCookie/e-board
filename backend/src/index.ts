@@ -81,7 +81,7 @@ export function setupWebSocketServer(server: Server) {
       if (messageData.type === 'message') {
         const roomId = messageData.roomId;
 
-        handleMessagesSave(messageData.message.message, roomId, clientId);
+        await handleMessagesSave(messageData.message.message, roomId, clientId);
 
         if (roomId) {
           broadcastToRoom(roomId, JSON.stringify(messageData));
@@ -95,7 +95,7 @@ export function setupWebSocketServer(server: Server) {
 
         console.log(messageData);
 
-        handleNotificationSave(messageData.title, clientId, messageData.recieverId, roomId);
+        await handleNotificationSave(messageData.title, clientId, messageData.recieverId, roomId);
 
         if (roomId) {
           broadcastToRoom(roomId, JSON.stringify(messageData));

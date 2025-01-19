@@ -19,6 +19,7 @@ router.get('/boardsInvites', board.boardsInvites);
 router.get('/boardUsers', board.boardUsers);
 router.get('/userBoards', board.userBoards);
 router.get('/load', board.handleBoardContentLoad);
+router.delete('/board', board.handleBoardDelete);
 
 router.get('/notification', notification.handleNotificationGet);
 router.delete('/notification', notification.handleNotificationDelete);

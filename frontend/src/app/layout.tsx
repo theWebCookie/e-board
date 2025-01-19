@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/Theme/theme-provider';
+import { twMerge } from 'tailwind-merge';
 
 const font = Poppins({ weight: ['400'], subsets: ['latin'] });
 
@@ -17,8 +18,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='pl' suppressHydrationWarning>
-      <body className={font.className}>
-        <ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
+      <body className={twMerge(font.className)}>
+        <ThemeProvider attribute='class' defaultTheme='light' enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>
       </body>

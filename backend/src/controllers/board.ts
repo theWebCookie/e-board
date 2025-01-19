@@ -262,3 +262,62 @@ export const handleBoardContentSaveDebounced = async (content: any, boardId: str
     }
   }, 2000);
 };
+
+export const handleBoardDelete = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.body;
+  const userId = (req.user as CustomJwtPayload).id;
+
+  if (!id) {
+    res.status(400).json({ error: 'Błędne dane!' });
+    return;
+  }
+
+  try {
+    const board = await prisma.board.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (!board) {
+      res.status(404).json({ error: 'Tablica nie znaleziona!' });
+      return;
+    }
+
+    if (board.authorId !== parseInt(userId)) {
+      res.status(403).json({ error: 'Nie jesteś autorem tablicy!' });
+      return;
+    }
+
+    const usersOnBoardsCount = await prisma.usersOnBoards.deleteMany({
+      where: {
+        boardId: id,
+      },
+    });
+
+    const boardInviteCount = await prisma.boardInvite.deleteMany({
+      where: {
+        boardId: id,
+      },
+    });
+
+    const messageCount = await prisma.message.deleteMany({
+      where: {
+        boardId: id,
+      },
+    });
+
+    const boardCount = await prisma.board.delete({
+      where: {
+        id,
+      },
+    });
+
+    console.log({ boardInviteCount: boardInviteCount, usersOnBoardsCount: usersOnBoardsCount, messageCount: messageCount, boardCount: boardCount });
+
+    res.status(200).json({ message: 'Tablica usunięta!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error });
+  }
+};
