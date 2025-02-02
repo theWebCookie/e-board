@@ -13,7 +13,7 @@ const DeleteBoardDialog: React.FC<DeleteBoardDialogProps> = ({ boardId, handleBo
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant='ghost' className='ml-2'>
+        <Button variant='ghost' className='ml-2' aria-label='trash'>
           <Trash />
         </Button>
       </DialogTrigger>

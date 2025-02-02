@@ -13,9 +13,6 @@ interface ICardDrawerDescriptionProps {
   updatedAt: Date;
 }
 
-// TODO:
-// - Display chart of elapsed time on board from API
-
 const CardDrawerDescription: React.FC<ICardDrawerDescriptionProps> = ({ users, inviteCode, createdAt, updatedAt }) => {
   const handleCopy = (event: MouseEvent<HTMLSpanElement>) => {
     const spanElement = event.currentTarget as HTMLSpanElement;

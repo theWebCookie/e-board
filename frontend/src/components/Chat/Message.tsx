@@ -22,8 +22,6 @@ const Message: React.FC<IMessageProps> = ({ message, isRight = false }) => {
     hour12: false,
   });
 
-  console.log(message);
-
   return (
     <>
       <div className={`font-light text-xs mb-1 ${isRight ? 'text-right' : 'text-left'}`}>

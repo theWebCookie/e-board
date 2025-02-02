@@ -37,7 +37,7 @@ const MenuInput: React.FC<MenuInputProps> = ({ className, image, name, color, va
           activeTools[name] === id ? 'bg-[#e0dfff]' : 'bg-[#ececf4]'
         }`}
       >
-        <input type='radio' onChange={(e) => handleInputChange(e)} name={name} id={id} className={menuButtonStyles} value={value} />
+        <input type='radio' onChange={(e) => handleInputChange(e)} name={name} id={id} className={menuButtonStyles} value={value} data-testid={id} />
         <Image src={image} width={size} height={size} alt={name} />
       </label>
     );
@@ -45,8 +45,8 @@ const MenuInput: React.FC<MenuInputProps> = ({ className, image, name, color, va
 
   if (color) {
     return (
-      <label className={`cursor-pointer rounded-sm p-1 ${activeTools[name] === id ? 'bg-[#e0dfff]' : 'bg-[#fff]'}`}>
-        <input type='radio' onChange={(e) => handleInputChange(e)} name={name} id={id} className={menuButtonStyles} value={value} />
+      <label className={`cursor-pointer rounded-sm p-1 ${activeTools[name] === id ? 'bg-[#e0dfff]' : 'bg-[#fff]'}`} aria-label='color'>
+        <input type='radio' onChange={(e) => handleInputChange(e)} name={name} id={id} className={menuButtonStyles} value={value} data-testid={id} />
         <div className={`w-5 h-5`} style={{ backgroundColor: color }} title={color}></div>
       </label>
     );

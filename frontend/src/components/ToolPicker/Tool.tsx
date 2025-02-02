@@ -56,7 +56,9 @@ const Tool: React.FC<ToolProps> = ({ icon, name, active, toolType }) => {
       >
         <Image src={icon} width={20} height={20} alt={name} priority={true} />
       </button>
-      {toolType === 'image' && <input type='file' accept='image/*' ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />}
+      {toolType === 'image' && (
+        <input type='file' accept='image/*' ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} aria-label='image' />
+      )}
     </>
   );
 };
